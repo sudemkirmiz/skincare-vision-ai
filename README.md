@@ -42,8 +42,6 @@
 - [Model limitations](#model-limitations)
 - [Product catalog](#product-catalog)
 - [License](#license)
-- [Release checklist](#release-checklist)
-- [Roadmap](#roadmap)
 
 ## Overview
 
@@ -519,21 +517,3 @@ This project is licensed under the **GNU Affero General Public License v3.0 or l
 If you modify this application and make it available over a network, the AGPL requires eligible users to receive access to the corresponding source code. Closed-source use may require an Ultralytics Enterprise license. This summary is not legal advice.
 
 Copyright © 2026 Sudem Kırmız.
-
-## Release checklist
-
-- [ ] Environment files and real user data are not tracked by Git
-- [ ] Ruff, Bandit, Pytest, pip-audit, and runtime smoke tests pass
-- [ ] Frontend lint, type checking, unit tests, build, npm audit, and Playwright pass
-- [ ] Public deployment variables and domain allowlists are configured
-- [ ] HTTPS, reverse-proxy limits, backups, and retention policies are ready
-- [x] Main license, third-party notices, and redistributed license texts are included
-- [ ] YOLO training-dataset sources and redistribution rights are documented
-- [ ] <code>git diff --check</code> is clean and changes are reviewed
-
-## Roadmap
-
-- OIDC-based accounts and per-user authorization for multi-tenant deployment
-- A stronger and more representative licensed detection dataset
-- Periodic validation of product formulas and official links
-- Centralized rate limiting, observability, and a production database option
