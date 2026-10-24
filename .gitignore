@@ -9,9 +9,7 @@ __pycache__/
 *$py.class
 
 outputs/*
-!outputs/.gitkeep
 inputs/*
-!inputs/.gitkeep
 
 *.log
 runs/

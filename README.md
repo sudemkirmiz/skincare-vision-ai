@@ -463,11 +463,11 @@ skincare-vision-ai/
 |-- .github/
 |   |-- workflows/              CI and GHCR image publishing
 |   `-- dependabot.yml          dependency update automation
-|-- assets/                     PDF fonts and store images
+|-- assets/                     PDF font assets
 |-- data/
 |   |-- products.json           verified starter catalog
 |   `-- products.example.json   catalog schema example
-|-- docs/                       dataset and model-training notes
+|-- docs/                       model training and dataset governance
 |-- frontend/
 |   |-- e2e/                    Playwright scenarios
 |   `-- src/                    React application
@@ -518,7 +518,7 @@ This project is licensed under the **GNU Affero General Public License v3.0 or l
 
 If you modify this application and make it available over a network, the AGPL requires eligible users to receive access to the corresponding source code. Closed-source use may require an Ultralytics Enterprise license. This summary is not legal advice.
 
-Copyright © 2026 SkinCare Vision AI contributors.
+Copyright © 2026 Sudem Kırmız.
 
 ## Release checklist
 

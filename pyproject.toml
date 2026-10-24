@@ -5,6 +5,7 @@ description = "Care-oriented facial skin appearance analysis with YOLO + VLM (no
 requires-python = ">=3.10"
 license = "AGPL-3.0-or-later"
 license-files = ["LICENSE"]
+authors = [{ name = "Sudem Kırmız" }]
 
 [project.urls]
 Repository = "https://github.com/sudemkirmiz/skincare-vision-ai"

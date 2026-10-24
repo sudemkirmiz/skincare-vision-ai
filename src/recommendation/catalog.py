@@ -55,7 +55,7 @@ ACTIVE_CATEGORIES = {
     "soothing": {"serum"},
     "tone_brightener": {"serum"},
 }
-# `icon` is a file name in assets/stores/ (the store's own favicon, stored locally so no third-party request is made).
+# `icon` names a file bundled in frontend/public/stores, avoiding third-party requests from the browser.
 DEFAULT_SEARCH_PROVIDERS = [
     {"name": "Trendyol", "url": "https://www.trendyol.com/sr?q={q}", "icon": "trendyol.png"},
     {"name": "Hepsiburada", "url": "https://www.hepsiburada.com/ara?q={q}", "icon": "hepsiburada.png"},
