@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "_comment": "FORMAT ÖRNEĞİ - ürünler kurgusaldır. Gerçek ürünleri data/products.json içine ekle. category: cleanser | moisturizer | sunscreen | serum | exfoliant | mask. skin_types: all | oily | combination | normal | dry. price_tier: low | mid | high. inci girilirse aktifler ve parfüm durumu otomatik çıkarılır; girilmezse key_ingredients (niacinamide, bha, azelaic, retinol, aha, vitamin_c, soothing, tone_brightener, hyaluronic, clay_mask) ve fragrance_free elle verilir.",
+  "search_providers": [
+    {"name": "Trendyol", "url": "https://www.trendyol.com/sr?q={q}"}
+  ],
+  "products": [
+    {
+      "id": "ornek-niasinamid-serum",
+      "name": "ÖRNEK Niasinamid %5 Serum",
+      "brand": "Örnek Marka",
+      "category": "serum",
+      "skin_types": ["oily", "combination"],
+      "price_tier": "low",
+      "inci": "Aqua, Niacinamide, Glycerin, Panthenol, Sodium Hyaluronate, Phenoxyethanol, Ethylhexylglycerin",
+      "url": "https://example.com/ornek-niasinamid",
+      "notes": "Kurgusal örnek ürün."
+    },
+    {
+      "id": "ornek-jel-temizleyici",
+      "name": "ÖRNEK Nazik Jel Temizleyici",
+      "brand": "Örnek Marka",
+      "category": "cleanser",
+      "skin_types": ["all"],
+      "price_tier": "low",
+      "key_ingredients": [],
+      "fragrance_free": true,
+      "notes": "Kurgusal örnek ürün; inci verilmediği için elle işaretlendi."
+    }
+  ]
+}

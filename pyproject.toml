@@ -1,0 +1,22 @@
+[project]
+name = "skincare-vision-ai"
+version = "2.0.0"
+description = "Care-oriented facial skin appearance analysis with YOLO + VLM (non-medical)."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 140
+extend-exclude = [".venv", "docs", "outputs", "frontend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# Long Turkish UI strings and prompts are kept on one line on purpose.
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["analysis", "config", "health", "history", "report", "api", "users", "recommendation", "vlm_quality", "vlm_router", "detection", "imaging", "main", "output", "preprocessing", "safety", "vlm_engine"]

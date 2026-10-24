@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "search_providers": [
+    {"name": "Trendyol", "url": "https://www.trendyol.com/sr?q={q}", "icon": "trendyol.png"},
+    {"name": "Hepsiburada", "url": "https://www.hepsiburada.com/ara?q={q}", "icon": "hepsiburada.png"},
+    {"name": "Google Alışveriş", "url": "https://www.google.com/search?tbm=shop&q={q}", "icon": "google.png"}
+  ],
+  "products": []
+}

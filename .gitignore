@@ -1,0 +1,38 @@
+﻿.env
+.venv/
+venv/
+env/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+outputs/*
+!outputs/.gitkeep
+inputs/*
+!inputs/.gitkeep
+
+*.log
+runs/
+wandb/
+.DS_Store
+Thumbs.db
+
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Local test photos of real people: never commit or ship them
+samples/*
+!samples/README.md
+
+# Local analysis history (contains face thumbnails)
+data/history.db*
+
+# Frontend build output and test artefacts (frontend/.gitignore covers node_modules and dist)
+frontend/test-results/
+frontend/playwright-report/
+# Fake webcam videos made for screenshot runs contain faces
+*.y4m

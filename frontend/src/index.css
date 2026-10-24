@@ -1,0 +1,114 @@
+@import './fonts.css';
+@import 'tailwindcss';
+
+/*
+ * Design tokens: the original fresh green palette with the refined layout — hairline borders instead of heavy
+ * shadows, a serif for headings and a neutral sans for everything else.
+ */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+
+  --color-canvas: #f4f9f4;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f1f8f2;
+  --color-ink: #24342b;
+  --color-ink-soft: #3f5046;
+  --color-muted: #68766d;
+  --color-line: #ddebde;
+  --color-line-strong: #c4dcc7;
+
+  /* Fresh green accent */
+  --color-brand-50: #eef7ef;
+  --color-brand-100: #dcefde;
+  --color-brand-200: #b9dfbd;
+  --color-brand-300: #8fcb96;
+  --color-brand-400: #66b26f;
+  --color-brand-500: #4caf50;
+  --color-brand-600: #3e8e47;
+  --color-brand-700: #2f6b45;
+  --color-brand-800: #24533a;
+
+  --color-blush-100: #fbefeb;
+  --color-blush-300: #f0c8be;
+  --color-blush-500: #d98b7a;
+  --color-sand-100: #fff9e8;
+  --color-sand-300: #f0dfa8;
+
+  /* Text on tinted notices */
+  --color-danger: #8a4238;
+  --color-warn-ink: #6a5a2e;
+
+  /* Status palette (validated for colour-vision deficiency; always paired with icon + label). */
+  --color-good: #0ca30c;
+  --color-mid: #c98500;
+  --color-watch: #ec835a;
+  --color-priority: #d03b3b;
+
+  --radius-card: 0.875rem;
+  --shadow-soft: 0 1px 2px rgb(50 80 61 / 0.04), 0 8px 24px rgb(50 80 61 / 0.05);
+  --shadow-lift: 0 18px 40px rgb(50 80 61 / 0.14);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  body {
+    @apply bg-canvas font-sans text-[15px] text-ink antialiased;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgb(165 214 167 / 0.22), transparent 32rem),
+      radial-gradient(circle at 100% 0%, rgb(240 200 190 / 0.2), transparent 28rem);
+    background-attachment: fixed;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+  ::selection {
+    @apply bg-brand-100 text-ink;
+  }
+}
+
+/* Reusable building blocks (Tailwind v4 @utility so they can be composed with @apply). */
+@utility card {
+  @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-soft)];
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-45;
+}
+@utility btn-primary {
+  @apply btn bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_rgb(76_175_80/0.25)] hover:shadow-[0_14px_30px_rgb(76_175_80/0.32)];
+}
+@utility btn-ghost {
+  @apply btn border border-line-strong bg-transparent text-ink hover:border-ink/40 hover:bg-surface;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-soft px-2.5 py-0.5 text-xs font-medium text-ink-soft;
+}
+@utility eyebrow {
+  @apply inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.14em] text-brand-600 uppercase;
+}
+@utility label {
+  @apply text-[11px] font-semibold tracking-[0.1em] text-muted uppercase;
+}
+@utility field {
+  @apply w-full rounded-[10px] border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
