@@ -1,267 +1,470 @@
 # SkinCare Vision AI
 
-**Kişisel cilt bakım asistanı** — a web app that analyses a face photo for care-oriented skin appearance, builds a personal routine and helps the user track progress over time.
+Fotoğraftan bakım odaklı cilt görünümü analizi yapan, kişiselleştirilmiş rutin oluşturan ve değişimi zaman içinde takip etmeye yardımcı olan açık kaynaklı web uygulaması.
 
-FastAPI · React 19 · TypeScript · Tailwind CSS v4 · YOLO · MediaPipe · OpenCV · Gemini / Groq / Hugging Face
+**Teknolojiler:** FastAPI · React 19 · TypeScript · Tailwind CSS v4 · YOLO · MediaPipe · OpenCV · Gemini / Groq / Hugging Face
 
-> **Not a medical device.** The app gives a cosmetic, visual pre-assessment only. It does not diagnose, name diseases, recommend prescription products or replace a dermatologist.
+> [!IMPORTANT]
+> SkinCare Vision AI bir tıbbi cihaz değildir. Yalnızca kozmetik ve görsel bir ön değerlendirme sunar; hastalık teşhis etmez, reçeteli tedavi önermez ve dermatoloğun yerini tutmaz.
 
 <p align="center">
-  <img src="screenshots/cilt-analizi.png" alt="Analysis result: Skin Score ring, marked face regions, key findings and the AI comment" width="100%">
+  <img src="screenshots/cilt-analizi.png" alt="SkinCare Vision AI analiz sonucu" width="100%">
 </p>
 
----
+## İçindekiler
 
-## Features
+- [Öne çıkan özellikler](#öne-çıkan-özellikler)
+- [Ekran görüntüleri](#ekran-görüntüleri)
+- [Mimari](#mimari)
+- [Hızlı başlangıç](#hızlı-başlangıç)
+- [Yapılandırma](#yapılandırma)
+- [Güvenlik ve gizlilik](#güvenlik-ve-gizlilik)
+- [Canlı ortama güvenli dağıtım](#canlı-ortama-güvenli-dağıtım)
+- [Test ve kalite](#test-ve-kalite)
+- [Docker](#docker)
+- [Proje yapısı](#proje-yapısı)
+- [Model sınırları](#model-sınırları)
+- [Lisans](#lisans)
 
-**Analysis**
-- 1–3 photos (front, left, right) or **guided camera capture** with live hints for distance, centring, head pose, light and sharpness; the photo is taken automatically when everything is right.
-- MediaPipe 478-point face mesh → forehead, nose, cheeks and chin regions (eyes, brows and lips excluded); OpenCV Haar fallback.
-- Custom YOLO detector (`acne_like_spot`) plus colour-based spot candidates and an optional Gemini second opinion that confirms or adds spots.
-- Sclera-based white balance, then five model-free sub-scores (spot density, redness, tone evenness, texture, shine) combined into a 0–100 **Skin Score**.
-- A care-oriented AI comment that addresses the user by name in the chosen *siz/sen* form.
+## Öne çıkan özellikler
 
-**Routine and products**
-- Rule-based morning/evening routine with reasons, contraindication checks (pregnancy, age, sensitivity, allergies) and a weekly evening plan that keeps conflicting actives apart.
-- **Ingredient checker**: paste an INCI list or photograph the label; the verdict is *Suitable / Use with care / Not recommended* for the current profile.
-- **Product shelf**: per-product verdicts, evening conflicts, duplicate actives, missing steps and period-after-opening reminders.
-- Product suggestions from an editable catalog with store-search fallback.
+### Cilt görünümü analizi
 
-**Tracking**
-- History with trends, routine events and **aligned before/after**: a drag slider and redness / dark-mark change maps that cancel lighting and shading differences.
-- **Daily journal**: routine adherence, skin feel, triggers and symptoms, a 4-week calendar and personal insights (e.g. "after short-sleep days your skin felt 1.6 points worse").
-- Two-page PDF report, JSON/CSV export and one-click erasure.
+- Önden, soldan ve sağdan olmak üzere 1–3 fotoğrafla çoklu görünüm analizi
+- Mesafe, konum, baş açısı, ışık ve netlik için canlı yönlendirmeli kamera
+- MediaPipe 478 noktalı yüz haritası; gerektiğinde OpenCV Haar yedeği
+- Alın, burun, yanak ve çene bölgeleri; göz, kaş ve dudakların analiz dışı tutulması
+- Özel `acne_like_spot` YOLO modeli, renk tabanlı adaylar ve isteğe bağlı Gemini ikinci görüşü
+- Sklera tabanlı beyaz ayarı sonrasında 0–100 arası Cilt Skoru
+- Nokta yoğunluğu, kızarıklık dengesi, ton eşitliği, doku ve parlama alt skorları
 
-**Helpers**
-- **Skin weather**: today's UV, temperature and humidity (Open-Meteo) turned into profile-aware tips.
-- **Skin coach** chat grounded in the profile, routine, shelf, journal and weather.
+### Rutin ve ürün desteği
 
-## Screenshots
+- Profil ve ölçümlere göre açıklanabilir sabah/akşam rutini
+- Hamilelik/emzirme, yaş, hassasiyet ve alerji kontrolleri
+- Birbiriyle çakışan aktifleri farklı akşamlara ayıran haftalık plan
+- Metin veya etiket fotoğrafından INCI içerik kontrolü
+- Ürün rafı, eksik rutin adımı, yinelenen aktif ve PAO süresi uyarıları
+- Düzenlenebilir, doğrulanmış başlangıç ürün kataloğu
 
-**1 · Onboarding** — required basics first (gender decides whether the pregnancy question applies), then optional details that make the routine more precise.
+### Takip ve raporlama
+
+- Cilt Skoru eğilimleri ve kayıt geçmişi
+- Hizalanmış önce/sonra karşılaştırması
+- Kızarıklık ve koyu iz değişim haritaları
+- Günlük rutin uyumu, tetikleyiciler, belirtiler ve kişisel içgörüler
+- PDF, JSON ve CSV dışa aktarma
+- Profil geçmişini ve kayıtlı küçük görselleri silme
+
+### Yardımcı araçlar
+
+- Open-Meteo verisinden UV, sıcaklık ve nem odaklı cilt hava durumu
+- Profil, rutin, ürün rafı ve günlük bağlamını kullanan cilt koçu
+- Gemini, Groq ve Hugging Face için geri dönüş zinciri, devre kesici ve önbellek
+
+## Ekran görüntüleri
+
+### Profil oluşturma
+
+Zorunlu bilgiler ve açık fotoğraf işleme onayı önce alınır; ikinci adımda bakım hedefleri ve kişiselleştirme ayrıntıları seçilir.
 
 <table>
   <tr>
-    <td width="50%"><img src="screenshots/profil1.png" alt="Onboarding step 1: basic information and consent"></td>
-    <td width="50%"><img src="screenshots/profil2.png" alt="Onboarding step 2: goals, current actives and sensitivities"></td>
+    <td width="50%"><img src="screenshots/profil1.png" alt="Profil oluşturma birinci adım"></td>
+    <td width="50%"><img src="screenshots/profil2.png" alt="Profil oluşturma ikinci adım"></td>
   </tr>
 </table>
 
-**2 · Products and skin coach** — the product shelf with missing-step hints, and the coach chat next to today's skin weather.
+### Ürünler ve cilt koçu
 
 <table>
   <tr>
-    <td width="50%"><img src="screenshots/urunler.png" alt="Product shelf: adding a product and missing-step hints"></td>
-    <td width="50%"><img src="screenshots/cilt-kocu.png" alt="Skin coach chat and the skin weather card"></td>
+    <td width="50%"><img src="screenshots/urunler.png" alt="Ürün rafı ve ürün değerlendirmesi"></td>
+    <td width="50%"><img src="screenshots/cilt-kocu.png" alt="Cilt koçu ve hava durumu"></td>
   </tr>
 </table>
 
-**3 · Daily journal** — routine adherence, skin feel, triggers and symptoms, a 4-week calendar and personal insights.
+### Günlük takip
 
 <table>
   <tr>
-    <td width="50%"><img src="screenshots/gunluk-takip.png" alt="Daily journal entry with streak, adherence and weather"></td>
-    <td width="50%"><img src="screenshots/gunluk-takip-devam.png" alt="Four-week calendar and personal insights"></td>
+    <td width="50%"><img src="screenshots/gunluk-takip.png" alt="Günlük cilt takibi"></td>
+    <td width="50%"><img src="screenshots/gunluk-takip-devam.png" alt="Takvim ve kişisel içgörüler"></td>
   </tr>
 </table>
 
-**4 · History** — trends with the AI settings drawer, the aligned before/after slider with score and region deltas, and data management.
+### Geçmiş ve karşılaştırma
 
 <table>
   <tr>
-    <td width="33%"><img src="screenshots/gecmis-ve-ayarlar.png" alt="Skin Score trends and the AI settings drawer"></td>
-    <td width="33%"><img src="screenshots/gecmis-devam.png" alt="Aligned before/after comparison slider"></td>
-    <td width="33%"><img src="screenshots/gecmis-son.png" alt="Routine events, saved records and the profile menu"></td>
+    <td width="33%"><img src="screenshots/gecmis-ve-ayarlar.png" alt="Geçmiş ve yapay zekâ ayarları"></td>
+    <td width="33%"><img src="screenshots/gecmis-devam.png" alt="Önce ve sonra karşılaştırması"></td>
+    <td width="33%"><img src="screenshots/gecmis-son.png" alt="Kayıtlar ve veri yönetimi"></td>
   </tr>
 </table>
 
-## Architecture
+## Mimari
 
 ```text
-frontend/ (React + Vite)  ──/api──▶  src/api/server.py (FastAPI)
-                                       ├─ analysis/      face mesh, regions, metrics, white balance, multi-view,
-                                       │                 second opinion, capture guide, change map
-                                       ├─ detection/     YOLO + MediaPipe + Haar
-                                       ├─ recommendation/ routine engine, ingredients, INCI checker, catalog, shelf
-                                       ├─ history/       SQLite store, comparison, journal insights
-                                       ├─ vlm_engine.py  Gemini / Groq / Hugging Face clients
-                                       ├─ vlm_router.py  provider fallback, circuit breaker, cache
-                                       ├─ coach.py       skin coach        weather.py  Open-Meteo + tips
-                                       └─ report/        PDF / text / JSON reports
+React + Vite
+    │
+    │ /api (JSON / multipart)
+    ▼
+FastAPI ── güvenlik, doğrulama, hız ve istek boyutu sınırları
+    ├── analysis/         çoklu görünüm, bölgeler, metrikler, değişim haritası
+    ├── detection/        YOLO, MediaPipe ve Haar
+    ├── recommendation/   rutin, aktifler, INCI, katalog ve ürün rafı
+    ├── history/          SQLite, günlük, karşılaştırma ve içgörüler
+    ├── report/           PDF, metin ve JSON raporları
+    ├── vlm_engine.py     sağlayıcı istemcileri
+    └── vlm_router.py     geri dönüş, devre kesici ve önbellek
 ```
 
-In production FastAPI also serves the built frontend (`frontend/dist`), so the whole app runs on one port.
+HTTP katmanı `src/api/server.py` içinde kalır; analiz ve iş kuralları alan modüllerinde yürütülür. Uzun ömürlü model ve servis örnekleri `src/api/container.py` tarafından yönetilir. Üretim derlemesinde FastAPI, `frontend/dist` içeriğini aynı origin üzerinden sunar.
 
-## Quick start
+Bir analiz isteğinin temel akışı şöyledir:
 
-Requirements: Python 3.10+ (tested on 3.12 and 3.13), Node.js 20+ and at least one VLM API key for AI comments (the rest works without).
+1. Kimlik doğrulama, hız sınırı ve toplam istek boyutu kontrol edilir.
+2. Görsel formatı, bütünlüğü, dosya boyutu ve açılmış piksel sayısı doğrulanır.
+3. Fotoğraf özel bir geçici dizinde normalize edilir; EXIF bilgisi taşınmaz.
+4. Yüz, bölgeler ve bakım odaklı görsel metrikler hesaplanır.
+5. Etkinse sınırlı veriyle VLM yorumu ve ikinci görüş alınır.
+6. Geçici dosyalar silinir; kullanıcı açıkça seçerse yalnızca küçük önizleme geçmişe kaydedilir.
+
+## Hızlı başlangıç
+
+### Gereksinimler
+
+- Python 3.10 veya üzeri; CI Python 3.12 kullanır
+- Node.js 22 veya üzeri
+- İsteğe bağlı AI yorumları için en az bir VLM sağlayıcı anahtarı
+
+AI anahtarı olmadan klasik görüntü analizi, rutin motoru, günlük ve raporlama özellikleri çalışmaya devam eder.
+
+### Windows / PowerShell kurulumu
 
 ```powershell
-# Backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
-pip install --no-deps mediapipe==1.1.1   # without opencv-contrib, which would replace YOLO's cv2
-Copy-Item .env.example .env              # then add your keys
 
-# Frontend
+pip install --extra-index-url https://download.pytorch.org/whl/cpu -c constraints.txt -r requirements.txt
+pip install --no-deps mediapipe==1.1.1
+
+Copy-Item .env.example .env
+
 cd frontend
-npm install
+npm ci
 npm run build
 cd ..
 
-# Run
-.venv\Scripts\python -m uvicorn api.server:app --app-dir src --port 8000
+.\.venv\Scripts\python -m uvicorn api.server:app --app-dir src --host 127.0.0.1 --port 8000
 ```
 
-Open http://localhost:8000. API docs are at `/docs`.
+Ardından `http://127.0.0.1:8000` adresini açın. Geliştirme modunda API belgeleri `http://127.0.0.1:8000/docs` adresindedir. Public modda saldırı yüzeyini küçültmek için Swagger, ReDoc ve OpenAPI uçları kapatılır.
 
-**Development with hot reload** (two terminals):
+`constraints.txt`, CI ve Docker'da doğrulanan doğrudan bağımlılık sürümlerini sabitler. MediaPipe `--no-deps` ile kurulur; gerekli çalışma zamanı bağımlılıkları `requirements.txt` içinde açıkça tutulur. Böylece MediaPipe'ın `opencv-contrib-python` paketi, YOLO için kullanılan OpenCV kurulumunu değiştirmez.
 
-```powershell
-.venv\Scripts\python -m uvicorn api.server:app --app-dir src --port 8000 --reload
-cd frontend; npm run dev    # http://localhost:5173, proxies /api to port 8000
-```
+### Geliştirme modu
 
-The model files `models/acne_like_spot.pt` and `models/face_landmarker.task` (Apache 2.0) are part of the repository. If the face landmarker is missing:
+İki terminal kullanın:
 
 ```powershell
-curl -L -o models/face_landmarker.task https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
-```
+# Terminal 1
+.\.venv\Scripts\python -m uvicorn api.server:app --app-dir src --port 8000 --reload
 
-## Configuration
-
-All settings live in `.env` (see `.env.example`); everything except the keys has a safe default.
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `GEMINI_API_KEY`, `GROQ_API_KEY`, `HF_TOKEN` | – | Provider keys (only the ones you use) |
-| `VLM_PROVIDER` | `Gemini` | Default provider in the UI |
-| `GEMINI_MODEL` / `GEMINI_FALLBACK_MODELS` | `gemini-3.5-flash` / `gemini-flash-lite-latest,gemini-2.5-flash` | Gemini models, tried in order on quota or server errors |
-| `GROQ_MODEL`, `HF_VLM_MODEL`, `HF_PROVIDER` | see `.env.example` | Other provider models |
-| `VLM_FALLBACK` / `VLM_FALLBACK_ORDER` | `true` / `Gemini,Groq,Hugging Face` | Try other providers that have a key |
-| `VLM_SECOND_OPINION` | `true` | Gemini spot check (+1 call per single-photo analysis) |
-| `VLM_TIMEOUT_SECONDS` / `VLM_MAX_RETRIES` / `VLM_TRUST_ENV_PROXY` | `90` / `2` / `false` | Network behaviour |
-| `YOLO_MODEL_PATH` / `YOLO_CONFIDENCE` | `models/acne_like_spot.pt` / `0.10` | Detector |
-| `FACE_LANDMARKER_PATH` | `models/face_landmarker.task` | Face mesh model |
-| `HISTORY_ENABLED` / `HISTORY_DB_PATH` | `true` / `data/history.db` | Profiles, history, journal and shelf |
-| `PRODUCT_CATALOG_PATH` | `data/products.json` | Editable product catalog |
-| `MAX_UPLOAD_MB` / `MAX_IMAGE_PIXELS` | `10` / `40000000` | Upload limits |
-| `ALLOW_USER_API_KEYS` | `true` | Let users type a personal key in the AI settings |
-| `CORS_ORIGINS` | `http://localhost:5173` | Extra origins allowed to call the API |
-| `LOG_LEVEL` | `INFO` | Logging |
-
-## Privacy and safety
-
-- Uploaded photos are processed in a private temp directory and deleted right after analysis; EXIF data is stripped. Only results and, if the user agrees, a 320 px face thumbnail are saved.
-- Server API keys never reach the browser; the health endpoint only reports whether a key exists. A personal key typed in the UI stays in memory for that tab.
-- AI providers receive the face crop, detection results, the routine and the display name with the address form — **never** the surname, age, gender, pregnancy or allergy answers. For the coach these answers only become a neutral "do not suggest" ingredient list.
-- Every AI response passes a safety filter that removes diagnoses, disease names, prescription drugs and treatment claims.
-- Camera preview frames are checked in memory and never stored. The weather service only sends coordinates rounded to ~10 km; the location stays in the browser.
-- All data of a profile (history, thumbnails, journal, shelf) can be exported or deleted at any time.
-- For a public deployment set `ALLOW_USER_API_KEYS=false` and `HISTORY_ENABLED=false` (there are no user accounts yet) and put the app behind HTTPS.
-
-## How it works
-
-<details>
-<summary><b>Skin Score</b></summary>
-
-All five sub-scores come from classical image processing on a scale-normalised face crop, after sclera-based white balance:
-
-| Sub-score | Measured from | Weight |
-|---|---|---|
-| Spot density | YOLO findings + colour spot candidates (+ Gemini second opinion) | 35% |
-| Redness balance | CIELAB a* (90th percentile + locally redder area) | 25% |
-| Tone evenness | lightness variation after removing illumination | 15% |
-| Texture smoothness | fine-scale lightness energy | 15% |
-| Shine control | specular highlight coverage | 10% |
-
-Thresholds live in `CALIBRATION` in `src/analysis/skin_metrics.py`. They are visual indices that depend on lighting and camera, not clinical measurements. With several photos each region is measured from the view where it is best visible.
-</details>
-
-<details>
-<summary><b>Routine engine and ingredient checker</b></summary>
-
-Each concern gets a 0–1 need from its sub-score, boosted by the user's goals and skin type. Actives come from a curated cosmetic knowledge base (`src/recommendation/ingredients.py`) with targets, timing, frequency, cautions and conflicts. Pregnancy, under-18s, very sensitive skin, salicylate sensitivity and dry skin exclude unsuitable actives, and every exclusion is shown with its reason. Conflicting actives get separate evenings in the weekly plan.
-
-The INCI checker detects actives, fragrance allergens, essential oils, drying alcohols near the top of the list and potentially pore-clogging ingredients. Labels carry no concentrations, so only ingredient order is used as a hint.
-</details>
-
-<details>
-<summary><b>Guided capture and change maps</b></summary>
-
-About twice a second a 360 px preview frame goes to `POST /api/capture/check`, which runs the face landmarker and returns the first thing to fix. Three good frames in a row trigger the full-resolution photo.
-
-The change map aligns the later thumbnail to the earlier one with a similarity transform on rigid landmarks. Both photos are band-pass filtered inside the shared skin area (a fine blur against noise minus a wide background that skips spots), so lighting direction, shading and colour cast cancel out and only spot-scale change remains. Notes warn about poor alignment or different head angles.
-</details>
-
-<details>
-<summary><b>Journal insights</b></summary>
-
-`src/history/insights.py` compares the user's own days: skin feel and symptom rates on the day after days with vs. without a trigger (the period is compared same-day), irritation after evening actives, the effect of the evening routine and adherence between saved analyses. Nothing is shown before 7 logged days, each finding needs at least 3 days on both sides, and findings are worded as associations, not causes.
-</details>
-
-<details>
-<summary><b>AI reliability</b></summary>
-
-Provider errors are classified (auth, credits, quota, network, server, config, blocked, bad output) and shown with a specific cause. Failed providers or Gemini models are benched for a cooldown (circuit breaker), other providers with a key are tried in order, identical requests reuse a one-hour cache, and comments are validated with Pydantic and checked against the analysis (severity wording, most affected region, excluded ingredients, address form).
-</details>
-
-## Testing
-
-```powershell
-pip install -r requirements-dev.txt
-ruff check .
-pytest
-
+# Terminal 2
 cd frontend
+npm run dev
+```
+
+Vite geliştirme sunucusu `http://localhost:5173` üzerinden çalışır ve `/api` isteklerini 8000 portuna yönlendirir.
+
+## Yapılandırma
+
+`.env.example` dosyasını `.env` adıyla kopyalayın. `.env` Git tarafından yok sayılır; gerçek anahtarları hiçbir zaman commit etmeyin.
+
+| Değişken | Varsayılan | Açıklama |
+|---|---:|---|
+| `GEMINI_API_KEY`, `GROQ_API_KEY`, `HF_TOKEN` | boş | Kullanılacak sağlayıcı anahtarları |
+| `VLM_PROVIDER` | `Gemini` | Arayüzde varsayılan sağlayıcı |
+| `GEMINI_MODEL` | `gemini-3.5-flash` | Birincil Gemini modeli |
+| `GEMINI_FALLBACK_MODELS` | örnek dosyada | Kota/sunucu hatasında sırayla denenen modeller |
+| `GROQ_MODEL`, `HF_VLM_MODEL`, `HF_PROVIDER` | örnek dosyada | Alternatif sağlayıcı ayarları |
+| `VLM_FALLBACK` | `true` | Anahtarı bulunan diğer sağlayıcılara geçiş |
+| `VLM_SECOND_OPINION` | `true` | Tek fotoğrafta isteğe bağlı Gemini nokta kontrolü |
+| `VLM_TIMEOUT_SECONDS` | `90` | Sağlayıcı istek zaman aşımı |
+| `VLM_MAX_RETRIES` | `2` | Geçici sağlayıcı hatalarında tekrar sayısı |
+| `VLM_TRUST_ENV_PROXY` | `false` | Sistem proxy değişkenlerini kullanma izni |
+| `YOLO_MODEL_PATH` | `models/acne_like_spot.pt` | YOLO ağırlık dosyası |
+| `YOLO_CONFIDENCE` | `0.10` | YOLO güven eşiği |
+| `FACE_LANDMARKER_PATH` | `models/face_landmarker.task` | MediaPipe model dosyası |
+| `HISTORY_ENABLED` | `true` | Profil, geçmiş, günlük ve raf depolama |
+| `HISTORY_DB_PATH` | `data/history.db` | Yerel SQLite dosyası |
+| `PRODUCT_CATALOG_PATH` | `data/products.json` | Düzenlenebilir ürün kataloğu |
+| `MAX_UPLOAD_MB` | `10` | Tek görselin sıkıştırılmış boyut sınırı |
+| `MAX_IMAGE_PIXELS` | `40000000` | Açılmış görsel piksel sınırı |
+| `MAX_REQUEST_BODY_MB` | `32` | JSON/multipart toplam istek sınırı |
+| `ANALYSIS_RATE_LIMIT` | `12` | IP başına saatlik analiz sınırı |
+| `LABEL_RATE_LIMIT` | `30` | Etiket okuma ve koç istek sınırı |
+| `CAPTURE_RATE_LIMIT` | `600` | Kamera kalite kontrolü saatlik sınırı |
+| `ALLOW_USER_API_KEYS` | `true` | Sekmeye özel sağlayıcı anahtarı girişine izin |
+| `PUBLIC_DEPLOYMENT` | `false` | Canlı ortam güvenlik kontrollerini zorunlu kılar |
+| `APP_ACCESS_TOKEN` | boş | Tek kiracılı uygulama erişim anahtarı |
+| `CORS_ORIGINS` | `http://localhost:5173` | İzin verilen tarayıcı origin listesi |
+| `ALLOWED_HOSTS` | yerel hostlar | Kabul edilen HTTP Host başlıkları |
+| `LOG_LEVEL` | `INFO` | Uygulama günlük seviyesi |
+
+## Güvenlik ve gizlilik
+
+Uygulamada aşağıdaki savunmalar bulunur:
+
+- Public modda en az 32 karakterli erişim anahtarı zorunludur.
+- Token karşılaştırması sabit zamanlı yapılır; token yalnızca sekme belleğinde (`sessionStorage`) tutulur.
+- Public mod, kullanıcı tarafından sağlayıcı anahtarı girilmesine izin vermez.
+- CORS metotları ve başlıkları açık bir izin listesiyle sınırlandırılmıştır.
+- `Host` başlığı izin listesiyle doğrulanır; public modda joker karakter reddedilir.
+- İstek gövdesi sınırı hem `Content-Length` hem chunked aktarımlarda multipart ayrıştırmasından önce uygulanır.
+- Görseller dosya boyutu, format, bütünlük ve piksel sayısı açısından doğrulanır.
+- Kamera önizlemeleri ayrıca 2 milyon piksel ve 1,5 MB ile sınırlandırılır.
+- Analiz, etiket okuma, koç ve kamera uçlarında IP tabanlı hız sınırı vardır.
+- CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` ve `Permissions-Policy` başlıkları uygulanır.
+- Public sağlık ucu yalnızca hazır olma bilgisini döndürür; sağlayıcı ve model ayrıntıları erişim korumalı `/api/status` ucundadır.
+- Profil, analiz ve geçmiş cevapları `no-store` olarak işaretlenir.
+- CSV dışa aktarmada elektronik tablo formülü enjeksiyonu engellenir.
+- VLM devre kesicisi sağlayıcı ve kimlik bilgisi kapsamında tutulur; bir kullanıcının hatalı anahtarı diğer anahtarları devre dışı bırakmaz.
+- Beklenmeyen sunucu hatalarının teknik ayrıntıları istemciye gönderilmez.
+
+Fotoğraflar özel bir geçici dizinde işlenir ve analiz sonrasında silinir. Kullanıcı onay verirse geçmiş için en fazla 320 piksel genişliğinde yüz önizlemesi SQLite içinde saklanabilir. Kamera kontrol kareleri kaydedilmez.
+
+Sunucu anahtarları tarayıcıya gönderilmez. VLM sağlayıcısına yalnızca yüz kırpımı, analiz bağlamı, hitap adı ve hitap biçimi gider; soyadı, cinsiyet ve hamilelik/emzirme yanıtı gönderilmez. Koç bağlamında ham alerji seçenekleri yerine yalnızca nötr bir “önerilmeyecek içerikler” listesi kullanılır. Sağlayıcı kullanımı yine de üçüncü taraf veri işleme anlamına gelir; canlı dağıtımda ilgili sağlayıcının gizlilik ve saklama koşullarını ayrıca değerlendirin.
+
+Tehdit bildirim süreci için [SECURITY.md](SECURITY.md) dosyasına bakın.
+
+## Canlı ortama güvenli dağıtım
+
+Bu proje varsayılan olarak yerel ve tek kiracılı kullanıma uygundur. İnternete veya yerel ağa açmadan önce:
+
+1. En az 32 rastgele karakterli bir token üretin:
+
+   ```powershell
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   ```
+
+2. `.env` içinde aşağıdaki ayarları yapın:
+
+   ```dotenv
+   PUBLIC_DEPLOYMENT=true
+   ALLOW_USER_API_KEYS=false
+   APP_ACCESS_TOKEN=üretilen-gizli-token
+   ALLOWED_HOSTS=cilt.example.com
+   CORS_ORIGINS=https://cilt.example.com
+   ```
+
+3. Uygulamayı TLS/HTTPS sağlayan güvenilir bir reverse proxy arkasında çalıştırın.
+4. Reverse proxy üzerinde bağlantı, toplam gövde boyutu ve merkezi hız sınırı tanımlayın; yalnızca gereken portları açın.
+5. `.env`, `data/history.db`, yüklenen fotoğraflar ve yedekleri Git'e veya genel artifact depolarına göndermeyin.
+6. SQLite dosyası için şifreli, erişim kontrollü yedekleme ve saklama politikası belirleyin.
+7. Sağlayıcı anahtarlarını düzenli döndürün ve minimum kota/yetkiyle kullanın.
+8. CI güvenlik kontrollerini ve Dependabot uyarılarını kapatmayın.
+
+`APP_ACCESS_TOKEN` tek kiracılı erişim korumasıdır; kullanıcı hesabı sistemi değildir. Birbirinden bağımsız son kullanıcıların bulunduğu dağıtımlarda OIDC veya benzeri bir kimlik sağlayıcı, kullanıcı bazlı yetkilendirme, kalıcı merkezi hız sınırı ve denetim kaydı eklenmelidir. Bu mimari kurulmadan uygulamayı çok kiracılı servis olarak yayınlamayın.
+
+## Analiz yönteminin özeti
+
+Beş alt skor, normalize edilmiş yüz kırpımı üzerinde klasik görüntü işleme ve gerektiğinde tespit modelinin çıktılarıyla hesaplanır:
+
+| Alt skor | Ölçüm yaklaşımı | Ağırlık |
+|---|---|---:|
+| Nokta yoğunluğu | YOLO, renk adayları ve isteğe bağlı ikinci görüş | %35 |
+| Kızarıklık dengesi | CIELAB a* dağılımı ve bölgesel fark | %25 |
+| Ton eşitliği | Aydınlatma etkisi azaltılmış parlaklık değişimi | %15 |
+| Doku düzgünlüğü | İnce ölçekli parlaklık enerjisi | %15 |
+| Parlama kontrolü | Speküler parlama alanı | %10 |
+
+Kalibrasyon eşikleri `src/analysis/skin_metrics.py` içindeki `CALIBRATION` tablosundadır. Sonuçlar ışık, kamera, açı ve görüntü kalitesinden etkilenir; klinik ölçüm olarak yorumlanmamalıdır.
+
+## Test ve kalite
+
+### Backend
+
+```powershell
+pip install -c constraints.txt -r requirements-dev.txt
+ruff check .
+python -m bandit -r src -q
+pytest
+```
+
+### Frontend
+
+```powershell
+cd frontend
+npm ci
 npm run lint
 npm run typecheck
 npm test
+npm run build
+npx playwright install chromium
+npm run test:e2e
 ```
 
-Tests never touch the network: a fixture blocks real HTTP and every provider call is mocked. `frontend/scripts/screens.mjs` drives the app in headless Chromium for visual review; run it against a throwaway backend (`HISTORY_DB_PATH=outputs/e2e.db`). `scripts/evaluate_samples.py` runs a regression over local photos in `samples/` (git-ignored; add `--vlm Gemini` to include AI comments).
+Pytest sırasında gerçek ağ erişimi engellenir; sağlayıcı çağrıları mock edilir. Playwright testleri gerçek Chromium üzerinde ana akışı, erişim anahtarı girişini ve kurtarılabilir profil hatasını sınar.
+
+GitHub Actions her push ve pull request için şunları çalıştırır:
+
+- Python lint, Bandit güvenlik taraması ve test paketi
+- Çalışma zamanı import smoke testi
+- `pip-audit` ile bilinen Python bağımlılık açıkları
+- Frontend lint, tip kontrolü, birim testi ve üretim derlemesi
+- `npm audit` ve Playwright uçtan uca testleri
+- Docker imajının gerçek BuildKit ortamında oluşturulması
+
+Dependabot; Python, npm ve GitHub Actions bağımlılıklarını düzenli kontrol eder.
 
 ## Docker
 
+### Yerel kullanım
+
 ```powershell
-docker build -t skincare-vision-ai .
-docker run --rm -p 8000:8000 --env-file .env -v skincare-data:/app/data skincare-vision-ai
+Copy-Item .env.example .env
+docker compose up --build -d
+docker compose ps
 ```
 
-The first stage builds the frontend with Node; the final image uses CPU-only PyTorch, runs as a non-root user and has a health check at `/api/health`. The volume keeps the database between restarts.
+Uygulama yalnızca `http://127.0.0.1:8000` üzerinde yayınlanır. Logları ve
+healthcheck durumunu görmek için:
 
-## Project structure
+```powershell
+docker compose logs -f app
+docker compose ps
+```
+
+Container'ı durdurmak için `docker compose down` kullanın. Bu komut geçmişi
+silmez; SQLite verisi `skincare-vision-ai-state` adlı volume içinde kalır.
+Veriyi de bilinçli olarak silmek isterseniz önce doğru Compose projesinde
+olduğunuzu doğrulayın, ardından `docker compose down --volumes` çalıştırın.
+
+### Canlı ortam
+
+```powershell
+Copy-Item .env.production.example .env.production
+# .env.production içindeki token, alan adı ve sağlayıcı anahtarlarını doldurun.
+
+$env:ENV_FILE = ".env.production"
+docker compose --env-file .env.production `
+  -f compose.yaml `
+  -f compose.production.yaml `
+  up --build -d
+```
+
+Canlı Compose katmanı `PUBLIC_DEPLOYMENT=true` ve
+`ALLOW_USER_API_KEYS=false` değerlerini zorunlu kılar; erişim tokeni, izinli
+host ve CORS origin'i boşsa Compose başlamaz. Port yine yalnızca loopback'e
+bağlanır; HTTPS sağlayan host tabanlı reverse proxy bu porta yönlendirilmelidir.
+
+Docker güvenlik özellikleri:
+
+- Çok aşamalı Node/Python build; final imajda kaynak geliştirme araçları yoktur.
+- Uygulama sabit `10001:10001` kimlikli root olmayan kullanıcıyla çalışır.
+- Root dosya sistemi salt okunurdur; yalnızca `/tmp` ve `/app/state` yazılabilir.
+- Tüm Linux capability'leri düşürülür ve `no-new-privileges` uygulanır.
+- SQLite verisi ürün kataloğundan ayrılmış `/app/state` volume'ünde saklanır.
+- PID ve log dosyası büyüklüğü sınırlandırılır; kapanış sinyalleri `tini` ile
+  düzgün iletilir.
+- `/api/health` modeli ve veritabanını denetler; hazır değilse `503` döndürür.
+- Tek worker kullanılır; bellek içi analiz önbelleği, devre kesici ve hız
+  sınırlarının süreçler arasında ayrışması önlenir.
+
+GitHub'da `v*` etiketi oluşturulduğunda veya Container workflow'u elle
+çalıştırıldığında imaj GHCR'a gönderilir. Yayınlanan imaj SBOM ve provenance
+bilgisi içerir. Normal push ve pull request'lerde CI imajı oluşturur ancak
+registry'ye göndermez.
+
+## Proje yapısı
 
 ```text
-src/
-  api/              FastAPI app, request schemas, shared service container
-  analysis/         service, regions, skin metrics, colour balance, multi-view, second opinion,
-                    capture guide, change map
-  detection/        YOLO spot detector, MediaPipe face mesh, Haar fallback
-  recommendation/   profile, ingredients, routine engine, INCI checker, catalog, shelf
-  history/          SQLite store (schema migrations), comparison, journal insights
-  report/           PDF (ReportLab + Poppins), text and JSON reports, file names
-  users/            user profile, onboarding rules, skin-type quiz
-  safety/           response safety filter and disclaimer
-  vlm_engine.py, vlm_router.py, vlm_quality.py, health.py, coach.py, weather.py, config.py
-frontend/src/
-  pages/            Onboarding, Analyze, Products (shelf + checker), Tracking, History
-  components/       UI kit, results, routine, camera, change map, shelf, weather, coach
-  icons/            custom duotone skincare icon set
-tests/              pytest suite (offline)
-data/               products.json (catalog, starts empty) and products.example.json
-models/             YOLO weights and MediaPipe face landmarker
-docs/               dataset and training notes for the YOLO model
-screenshots/        README screenshots
+SkinCareVisionAI/
+├── .github/
+│   ├── workflows/             CI ve GHCR container yayını
+│   └── dependabot.yml         otomatik bağımlılık güncellemeleri
+├── assets/                    PDF fontları ve mağaza görselleri
+├── data/
+│   ├── products.json          doğrulanmış başlangıç kataloğu
+│   └── products.example.json  katalog şema örneği
+├── docs/                      veri kümesi ve model eğitim notları
+├── frontend/
+│   ├── e2e/                   Playwright senaryoları
+│   └── src/
+│       ├── components/        ortak arayüz bileşenleri
+│       ├── icons/             özel ikon seti
+│       ├── lib/               API, durum ve tipler
+│       └── pages/             uygulama sayfaları
+├── models/                    YOLO ve MediaPipe model dosyaları
+├── licenses/                  üçüncü taraf lisans metinleri
+├── scripts/                   örnek değerlendirme araçları
+├── src/
+│   ├── analysis/              analiz hattı ve metrikler
+│   ├── api/                   FastAPI, şemalar, güvenlik ve servis kabı
+│   ├── detection/             yüz ve bulgu tespiti
+│   ├── history/               SQLite ve kişisel içgörüler
+│   ├── recommendation/        rutin, INCI ve katalog
+│   ├── report/                PDF, metin ve JSON raporları
+│   ├── safety/                tıbbi iddia filtreleri
+│   └── users/                 profil ve onboarding kuralları
+├── tests/                     çevrimdışı pytest paketi
+├── constraints.txt            doğrulanmış doğrudan sürümler
+├── compose.yaml               güvenli yerel container çalıştırma
+├── compose.production.yaml    canlı ortam zorunlulukları
+├── Dockerfile
+├── LICENSE
+├── SECURITY.md
+├── THIRD_PARTY_NOTICES.md
+└── README.md
 ```
 
-## YOLO model
+`inputs/`, `outputs/`, `samples/`, `frontend/dist`, test artifact'ları ve yerel SQLite dosyası `.gitignore` ile korunur. Model dosyaları bilinçli olarak depoda tutulur; kaynak, lisans ve SHA-256 bilgileri `THIRD_PARTY_NOTICES.md` içinde kayıtlıdır. YOLO eğitim veri kümesinin kaynağı ve yeniden dağıtım izni ise yayın öncesinde proje sahibi tarafından ayrıca belgelenmelidir.
 
-The detector has one class, `acne_like_spot`. It is a first version (mAP50 ≈ 0.37), which is why colour analysis and the optional Gemini second opinion complement it. Dataset and training notes are in `docs/`. Retraining with more close-up photos, varied lighting and skin tones, and negative examples (freckles, pores, moles, shadows) is the most valuable next improvement.
+## Ürün kataloğu
 
-## Roadmap
+`data/products.json` altı ürünlük doğrulanmış bir başlangıç kataloğudur. Ürün adı, resmi sayfa, içerik listesi mevcutsa INCI ve doğrulama tarihi içerir. Katalog değişiklikleri yayınlanmadan önce üreticinin resmi sayfasından yeniden kontrol edilmelidir; formüller ve bağlantılar zaman içinde değişebilir.
 
-- User accounts, so history can be enabled on a public deployment
-- A retrained, stronger spot detector
-- A curated product catalog
+## Model sınırları
+
+YOLO dedektörü tek sınıflıdır: `acne_like_spot`. Mevcut ilk sürümün mAP50 değeri yaklaşık `0,37` olduğu için tek başına klinik veya kesin bir tespit aracı değildir. Renk analizi ve isteğe bağlı ikinci görüş bu nedenle tamamlayıcı olarak kullanılır.
+
+En değerli sonraki model çalışması; farklı cilt tonları, ışıklar, kamera türleri ve ben, çil, gözenek, gölge gibi negatif örnekler içeren daha geniş ve izinli bir veri kümesiyle yeniden eğitimdir. Eğitim notları `docs/` altındadır.
+
+## Lisans
+
+Bu proje, Ultralytics YOLO bağımlılığı ve YOLO ile eğitilmiş model nedeniyle
+**GNU Affero General Public License v3.0 veya sonrası (AGPL-3.0-or-later)**
+altında yayımlanır. Tam koşullar için [`LICENSE`](LICENSE), doğrudan dağıtılan
+model, font ve marka varlıklarının ayrı koşulları için
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) dosyasını okuyun.
+
+AGPL kapsamında uygulamayı değiştirerek ağ üzerinden kullanıma sunanların,
+kullanıcılara karşılık gelen kaynak koda erişim sağlaması gerekir. Kapalı
+kaynak veya ticari kullanım düşünülüyorsa özellikle Ultralytics lisans koşulları
+incelenmeli ve gerekiyorsa Enterprise lisansı edinilmelidir. Eğitim veri
+kümesinin kullanım ve yeniden dağıtım hakkı ayrıca doğrulanmalıdır.
+
+Copyright © 2026 SkinCare Vision AI katkıda bulunanları.
+
+## Yayın öncesi kontrol listesi
+
+- [ ] `.env` ve gerçek kullanıcı verileri Git tarafından takip edilmiyor
+- [ ] `ruff check .` ve `pytest` başarılı
+- [ ] Frontend lint, tip kontrolü, test ve build başarılı
+- [ ] Playwright senaryoları başarılı
+- [ ] `npm audit` ve `pip-audit` temiz
+- [ ] Public dağıtım değişkenleri ve alan adı izin listesi tanımlı
+- [ ] HTTPS, reverse proxy limitleri ve yedekleme politikası hazır
+- [x] Ana lisans, üçüncü taraf bildirimleri ve dağıtılan lisans metinleri eklendi
+- [ ] YOLO eğitim veri kümesinin kaynağı ve yeniden dağıtım izni belgelendi
+- [ ] `git diff --check` temiz ve değişiklikler gözden geçirilmiş
+
+## Yol haritası
+
+- Çok kiracılı dağıtım için OIDC tabanlı kullanıcı hesapları ve yetkilendirme
+- Daha güçlü ve daha dengeli veri kümesiyle eğitilmiş bulgu dedektörü
+- Ürün formülleri ve resmi bağlantılar için periyodik doğrulama
+- Merkezi hız sınırı, gözlemlenebilirlik ve üretim veritabanı seçeneği

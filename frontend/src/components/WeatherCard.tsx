@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+/* oxlint-disable react/only-export-components -- persisted-location parsing is tested with this component */
 import clsx from 'clsx'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Alert, Drop, Pin, ShieldSun, Sun } from '../icons'

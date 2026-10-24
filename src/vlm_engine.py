@@ -703,7 +703,8 @@ def _retry_after_seconds(value: str | None) -> float | None:
 
 
 def _backoff(attempt: int, retry_after: str | None) -> None:
-    delay = min(8.0, 0.8 * (2 ** (attempt - 1))) + random.uniform(0, 0.3)
+    # Jitter is scheduling noise, not a secret or security decision.
+    delay = min(8.0, 0.8 * (2 ** (attempt - 1))) + random.uniform(0, 0.3)  # nosec B311
     if retry_after:
         try:
             delay = min(20.0, float(retry_after))

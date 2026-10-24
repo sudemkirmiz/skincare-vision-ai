@@ -71,6 +71,15 @@ def test_failed_provider_is_benched_then_retried_after_cooldown(crop):
     assert engine.calls[-2:] == ["Gemini", "Groq"]
 
 
+def test_bad_personal_key_does_not_bench_another_credential(crop):
+    engine = scripted_engine({"Gemini": VLMProviderError("expired", "auth"), "Groq": ok_output("Groq")})
+    router = VLMRouter(engine)
+    router.analyze([ProviderTarget("Gemini", "bad-personal-key"), CHAIN[1]], crop, {"summary": 1}, {})
+    engine.analyze.side_effect = lambda provider, **_: ok_output(provider)
+    output, attempts = router.analyze([ProviderTarget("Gemini", "server-key")], crop, {"summary": 2}, {})
+    assert output["provider"] == "Gemini" and attempts[0]["status"] == "ok"
+
+
 def test_quota_cooldown_respects_retry_after():
     clock = FakeClock()
     health = ProviderHealth(clock)

@@ -5,5 +5,77 @@
     {"name": "Hepsiburada", "url": "https://www.hepsiburada.com/ara?q={q}", "icon": "hepsiburada.png"},
     {"name": "Google Alışveriş", "url": "https://www.google.com/search?tbm=shop&q={q}", "icon": "google.png"}
   ],
-  "products": []
+  "products": [
+    {
+      "id": "cerave-kopuren-temizleyici",
+      "name": "Köpüren Temizleyici",
+      "brand": "CeraVe",
+      "category": "cleanser",
+      "skin_types": ["normal", "oily", "combination"],
+      "price_tier": "mid",
+      "inci": "Aqua/Water, Cocamidopropyl Hydroxysultaine, Glycerin, Sodium Lauroyl Sarcosinate, Propanediol, PEG-150 Pentaerythrityl Tetrastearate, PEG-6 Caprylic/Capric Glycerides, Niacinamide, Ceramide NP, Ceramide AP, Ceramide EOP, Carbomer, Sodium Methyl Cocoyl Taurate, Sodium Benzoate, Sodium Chloride, Sodium Lauroyl Lactylate, Cholesterol, Phenoxyethanol, Disodium EDTA, Citric Acid, Tetrasodium EDTA, Phytosphingosine, Xanthan Gum, Ethylhexylglycerin",
+      "key_ingredients": ["niacinamide", "hyaluronic"],
+      "url": "https://www.cerave.com.tr/cilt-bakimi/kopuren-temizleyici",
+      "notes": "Üreticinin resmi Türkiye sayfasındaki formül 25.10.2026 tarihinde doğrulandı; ambalaj etiketini kontrol edin."
+    },
+    {
+      "id": "lrp-effaclar-mikro-peeling-jel",
+      "name": "Effaclar Mikro Peeling Arındırıcı Jel",
+      "brand": "La Roche-Posay",
+      "category": "cleanser",
+      "skin_types": ["oily", "combination"],
+      "price_tier": "high",
+      "inci": "Aqua/Water, Sodium Laureth Sulfate, Decyl Glucoside, Glycerin, Sodium Chloride, Coco-Betaine, Salicylic Acid, PEG-150 Pentaerythrityl Tetrastearate, PEG-6 Caprylic/Capric Glycerides, Zinc Gluconate, Sodium Hydroxide, Capryloyl Salicylic Acid, Tetrasodium EDTA, Citric Acid, Menthol, Polyquaternium-47, Hexylene Glycol, Sodium Benzoate",
+      "key_ingredients": ["bha"],
+      "url": "https://www.laroche-posay.com.tr/effaclar-mikro-peeling-arindirici-jel",
+      "notes": "Salisilik asit içeren arındırıcı seçenek; hassas ciltte seyrek kullanım değerlendirilmelidir. Resmi formül 25.10.2026 tarihinde doğrulandı."
+    },
+    {
+      "id": "cerave-nemlendirici-krem",
+      "name": "Nemlendirici Krem",
+      "brand": "CeraVe",
+      "category": "moisturizer",
+      "skin_types": ["dry", "normal"],
+      "price_tier": "mid",
+      "inci": "Aqua/Water, Glycerin, Cetearyl Alcohol, Caprylic/Capric Triglyceride, Cetyl Alcohol, Ceteareth-20, Petrolatum, Potassium Phosphate, Ceramide NP, Ceramide AP, Ceramide EOP, Carbomer, Dimethicone, Behentrimonium Methosulfate, Sodium Lauroyl Lactylate, Sodium Hyaluronate, Cholesterol, Phenoxyethanol, Disodium EDTA, Dipotassium Phosphate, Tocopherol, Phytosphingosine, Xanthan Gum, Ethylhexylglycerin",
+      "key_ingredients": ["hyaluronic", "soothing"],
+      "url": "https://www.cerave.com.tr/cilt-bakimi/nemlendirici-krem",
+      "notes": "Kuru ve çok kuru cilt için parfümsüz seçenek. Resmi formül 25.10.2026 tarihinde doğrulandı; ambalaj etiketini kontrol edin."
+    },
+    {
+      "id": "bioderma-sensibio-defensive",
+      "name": "Sensibio Defensive Cream",
+      "brand": "Bioderma",
+      "category": "moisturizer",
+      "skin_types": ["normal", "combination", "dry"],
+      "price_tier": "high",
+      "key_ingredients": ["soothing"],
+      "fragrance_free": null,
+      "url": "https://www.bioderma.com.tr/urunlerimiz/sensibio/defensive-cream",
+      "notes": "Hassaslaşabilen cilt için hafif nemlendirici; üretici ürün bilgisi 25.10.2026 tarihinde doğrulandı. Güncel INCI için ambalajı kontrol edin."
+    },
+    {
+      "id": "lrp-anthelios-uvmune-400-fluid",
+      "name": "Anthelios UVMune 400 Fluid SPF50+",
+      "brand": "La Roche-Posay",
+      "category": "sunscreen",
+      "skin_types": ["all"],
+      "price_tier": "high",
+      "inci": "Aqua/Water, Alcohol Denat., Triethyl Citrate, Diisopropyl Sebacate, Silica, Ethylhexyl Salicylate, Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine, Ethylhexyl Triazone, Butyl Methoxydibenzoylmethane, Glycerin, Propanediol, C12-22 Alkyl Acrylate/Hydroxyethylacrylate Copolymer, Sodium Citrate, Methoxypropylamino Cyclohexenylidene Ethoxyethylcyanoacetate, Perlite, Tocopherol, Caprylic/Capric Triglyceride, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Caprylyl Glycol, Citric Acid, Diethylamino Hydroxybenzoyl Hexyl Benzoate, Drometrizole Trisiloxane, Hydroxyethylcellulose, Terephthalylidene Dicamphor Sulfonic Acid, Triethanolamine, Trisodium Ethylenediamine Disuccinate",
+      "url": "https://www.laroche-posay.com.tr/anthelios-uvmune-400-fluid-yuz-gunes-kremi",
+      "notes": "Tüm cilt tipleri için akışkan SPF50+ seçenek. Alkol içeriği hassas ciltte batma yapabilir; resmi formül 25.10.2026 tarihinde doğrulandı."
+    },
+    {
+      "id": "bioderma-photoderm-xdefense-ultra-fluid",
+      "name": "Photoderm XDefense Ultra-Fluid SPF50+",
+      "brand": "Bioderma",
+      "category": "sunscreen",
+      "skin_types": ["all"],
+      "price_tier": "high",
+      "inci": "Aqua/Water, C12-15 Alkyl Benzoate, Silica, Glycerin, Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine, Butyl Methoxydibenzoylmethane, Ethylhexyl Methoxycrylene, Diethylamino Hydroxybenzoyl Hexyl Benzoate, Diisopropyl Sebacate, Lauroyl Lysine, Propanediol, Dicaprylyl Carbonate, 1,2-Hexanediol, Polysorbate 60, Cetyl Phosphate, Arginine, Bentonite, Hydroxyacetophenone, Fragrance/Parfum, Citric Acid, Ectoin, Mannitol, Sodium Phytate, Xanthan Gum, Xylitol, Rhamnose, O-Cymen-5-Ol, Biosaccharide Gum-4, Sodium Hyaluronate, Tocopherol",
+      "key_ingredients": ["hyaluronic"],
+      "url": "https://www.bioderma.com.tr/urunlerimiz/photoderm/xdefense-ultra-fluid-spf50",
+      "notes": "Akışkan SPF50+ seçenek; parfüm içerir ve parfüm hassasiyetinde otomatik elenir. Resmi formül 25.10.2026 tarihinde doğrulandı."
+    }
+  ]
 }

@@ -116,6 +116,7 @@ def test_recommend_products_filters_by_profile_and_falls_back_to_search():
             Product(id="t", name="BHA Tonik", brand="X", category="exfoliant", inci=BHA_TONER, price_tier="low"),
             Product(id="m", name="Seramid Krem", brand="X", category="moisturizer", inci=CERAMIDE_CREAM),
             Product(id="r", name="Retinol Serum", brand="X", category="serum", inci=RETINOL_SERUM, skin_types=["dry"]),
+            Product(id="s", name="Bentonitli SPF", brand="X", category="sunscreen", key_ingredients=["clay_mask"]),
         ],
         search_providers=[{"name": "Shop", "url": "https://shop.example/s?q={q}"}],
     )
@@ -130,6 +131,8 @@ def test_recommend_products_filters_by_profile_and_falls_back_to_search():
     bha_section = next((s for title, s in sections.items() if "BHA" in title), None)
     if bha_section and bha_section["products"]:
         assert bha_section["products"][0]["verdict"] == "caution"
+    active_sections = [section for title, section in sections.items() if title not in {"Temizleme", "Nemlendirme", "Güneş koruma"}]
+    assert all(product["name"] != "Bentonitli SPF" for section in active_sections for product in section["products"])
 
 
 def test_search_links_encode_turkish_characters():

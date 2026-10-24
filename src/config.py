@@ -80,7 +80,13 @@ class Settings:
     vlm_fallback_order: tuple[str, ...]
     max_upload_mb: int
     max_image_pixels: int
+    max_request_body_mb: int
     allow_user_api_keys: bool
+    public_deployment: bool
+    app_access_token: str
+    analysis_rate_limit: int
+    label_rate_limit: int
+    capture_rate_limit: int
     log_level: str
 
 
@@ -114,8 +120,15 @@ def get_settings() -> Settings:
         ),
         max_upload_mb=max(1, _env_int("MAX_UPLOAD_MB", 10)),
         max_image_pixels=max(1, _env_int("MAX_IMAGE_PIXELS", 40_000_000)),
+        max_request_body_mb=max(2, _env_int("MAX_REQUEST_BODY_MB", 32)),
         # In a public deployment, visitors should not be able to swap API keys.
         allow_user_api_keys=_env_bool("ALLOW_USER_API_KEYS", True),
+        # Public mode is fail-closed: create_app refuses to start without an access token.
+        public_deployment=_env_bool("PUBLIC_DEPLOYMENT", False),
+        app_access_token=os.getenv("APP_ACCESS_TOKEN", "").strip(),
+        analysis_rate_limit=max(1, _env_int("ANALYSIS_RATE_LIMIT", 12)),
+        label_rate_limit=max(1, _env_int("LABEL_RATE_LIMIT", 30)),
+        capture_rate_limit=max(1, _env_int("CAPTURE_RATE_LIMIT", 600)),
         # Local convenience: show .env keys in the sidebar. Turn off for public deployments.
         log_level=_env_str("LOG_LEVEL", "INFO").upper(),
     )

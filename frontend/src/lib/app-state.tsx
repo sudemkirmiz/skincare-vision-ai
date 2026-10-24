@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+/* oxlint-disable react/only-export-components -- provider and its access hook form one public module */
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { api } from './api'
 import type { Analysis, Options, Profile } from './types'
@@ -115,6 +116,17 @@ export function AppStateProvider({ options, children }: { options: Options; chil
   }
 
   if (profilesQuery.isPending) return null
+  if (profilesQuery.isError) {
+    return (
+      <div className="grid min-h-screen place-items-center p-6 text-center">
+        <div className="card max-w-md p-8">
+          <h1 className="text-lg font-bold">Profiller yüklenemedi</h1>
+          <p className="mt-2 text-sm text-muted">Kayıtlarınıza şu anda ulaşılamıyor. Bağlantıyı kontrol edip yeniden deneyin.</p>
+          <button className="btn-primary mt-4" type="button" onClick={() => void profilesQuery.refetch()}>Tekrar dene</button>
+        </div>
+      </div>
+    )
+  }
   return <Context.Provider value={value}>{children}</Context.Provider>
 }
 

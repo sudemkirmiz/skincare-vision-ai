@@ -8,22 +8,26 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 from typing import Annotated, Any
 
 import cv2
 import numpy as np
-from fastapi import FastAPI, File, Form, Header, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from analysis.capture_guide import TARGETS, assess_frame
 from analysis.change_map import ChangeMapError, build_change_map
 from analysis.service import PROVIDER_ENV_KEYS
 from api.container import Container
+from api.rate_limit import RateLimiter
 from api.schemas import CoachIn, EventIn, JournalIn, ProductCheckIn, ProfileIn, QuizIn, SaveAnalysisIn, ShelfItemIn
+from api.security import RequestBodyLimitMiddleware
 from coach import SUGGESTIONS, DailyLimiter, ask, build_context, clean_messages
 from config import PROJECT_ROOT, PROVIDER_ENV_ALIASES, Settings, configure_logging, get_env_value, get_settings, load_env_file
 from history.compare import compare_records, previous_record_comparison, trend_rows
@@ -75,6 +79,7 @@ logger = logging.getLogger("skincare.api")
 PROVIDERS = ["Gemini", "Hugging Face", "Groq"]
 MAX_VIEWS = 3
 MAX_FRAME_BYTES = 1_500_000
+MAX_FRAME_PIXELS = 2_000_000
 JOURNAL_EDIT_DAYS = 30
 MAX_SHELF_ITEMS = 40
 INGREDIENT_IDS = {item.name: item.id for item in INGREDIENTS.values()}
@@ -146,6 +151,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         load_env_file(PROJECT_ROOT / ".env")
         settings = get_settings()
     configure_logging(settings.log_level)
+    if settings.public_deployment and len(settings.app_access_token) < 32:
+        raise RuntimeError("PUBLIC_DEPLOYMENT=true için en az 32 karakterli APP_ACCESS_TOKEN tanımlanmalıdır.")
+    if settings.public_deployment and settings.allow_user_api_keys:
+        raise RuntimeError("PUBLIC_DEPLOYMENT=true iken ALLOW_USER_API_KEYS=false olmalıdır.")
     services = container or Container(settings)
 
     @asynccontextmanager
@@ -153,11 +162,87 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         yield
         services.close()
 
-    app = FastAPI(title="SkinCare Vision AI API", version="2.0.0", lifespan=lifespan)
+    app = FastAPI(
+        title="SkinCare Vision AI API",
+        version="2.0.0",
+        lifespan=lifespan,
+        docs_url=None if settings.public_deployment else "/docs",
+        redoc_url=None if settings.public_deployment else "/redoc",
+        openapi_url=None if settings.public_deployment else "/openapi.json",
+    )
     app.state.container = services
+    rate_limiter = RateLimiter()
+
+    def harden_response(response: Response, path: str) -> Response:
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        response.headers.setdefault("Permissions-Policy", "camera=(self), geolocation=(self), microphone=()")
+        if settings.public_deployment:
+            response.headers.setdefault(
+                "Content-Security-Policy",
+                "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; "
+                "form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'",
+            )
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        if path.startswith("/api/") and path != "/api/health":
+            response.headers.setdefault("Cache-Control", "no-store")
+        return response
+
+    @app.middleware("http")
+    async def api_guard(request: Request, call_next):
+        path = request.url.path
+        protected = path.startswith("/api/") or (not settings.public_deployment and path in {"/docs", "/redoc", "/openapi.json"})
+        if protected and path != "/api/health" and request.method != "OPTIONS" and settings.app_access_token:
+            authorization = request.headers.get("authorization", "")
+            scheme, _, supplied = authorization.partition(" ")
+            valid = scheme.lower() == "bearer" and secrets.compare_digest(
+                supplied.encode("utf-8"), settings.app_access_token.encode("utf-8")
+            )
+            if not valid:
+                return harden_response(JSONResponse(
+                    status_code=401,
+                    content={"detail": "Bu uygulama için geçerli erişim anahtarı gerekli."},
+                    headers={"WWW-Authenticate": "Bearer"},
+                ), path)
+
+        action_limits = {
+            ("POST", "/api/analyses"): ("analysis", settings.analysis_rate_limit),
+            ("POST", "/api/products/read-label"): ("label", settings.label_rate_limit),
+            ("POST", "/api/coach"): ("coach", settings.label_rate_limit),
+            ("POST", "/api/capture/check"): ("capture", settings.capture_rate_limit),
+        }
+        limited = action_limits.get((request.method, path))
+        if limited:
+            action, limit = limited
+            subject = request.client.host if request.client else "unknown"
+            allowed, retry_after = rate_limiter.take(subject, action, limit)
+            if not allowed:
+                return harden_response(JSONResponse(
+                    status_code=429,
+                    content={"detail": "İstek sınırına ulaşıldı; lütfen daha sonra tekrar deneyin."},
+                    headers={"Retry-After": str(retry_after)},
+                ), path)
+
+        response = await call_next(request)
+        return harden_response(response, path)
+
     # Dev server of the React app; in production the API serves the built frontend itself (same origin).
     origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o.strip()]
-    app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
+    if settings.public_deployment and "*" in origins:
+        raise RuntimeError("PUBLIC_DEPLOYMENT=true iken CORS_ORIGINS joker karakter içeremez.")
+    allowed_hosts = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",") if host.strip()]
+    if settings.public_deployment and "*" in allowed_hosts:
+        raise RuntimeError("PUBLIC_DEPLOYMENT=true iken ALLOWED_HOSTS joker karakter içeremez.")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Provider-Key"],
+    )
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+    app.add_middleware(RequestBodyLimitMiddleware, max_bytes=settings.max_request_body_mb * 1024 * 1024)
 
     def get_profile(profile_id: str) -> UserProfile:
         data = services.store.get_profile(profile_id)
@@ -177,13 +262,26 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         return {**payload, "routine": build_routine(payload.get("skin_metrics"), profile.skin)}
 
     # --- meta ------------------------------------------------------------
-    @app.get("/api/health")
-    def health() -> dict[str, Any]:
-        benched = services.service.router.health.snapshot()
-        return {
-            "status": "ok",
-            "version": app.version,
-            "models": {"yolo": settings.yolo_model_path.exists(), "landmarks": settings.face_landmarker_path.exists()},
+    def readiness_details() -> tuple[bool, dict[str, Any]]:
+        scoped_benches = services.service.router.health.snapshot()
+        benched: dict[str, tuple[str, int]] = {}
+        for scoped_name, reason in scoped_benches.items():
+            name = scoped_name.split(":", 1)[0]
+            if name not in benched or reason[1] > benched[name][1]:
+                benched[name] = reason
+        yolo_ready = settings.yolo_model_path.is_file() and settings.yolo_model_path.stat().st_size > 0
+        database_ready = True
+        database_error = None
+        if settings.history_enabled:
+            try:
+                services.store.check()
+            except Exception as error:
+                logger.exception("Readiness database check failed")
+                database_ready, database_error = False, type(error).__name__
+        ready = yolo_ready and database_ready
+        return ready, {
+            "models": {"yolo": yolo_ready, "landmarks": settings.face_landmarker_path.is_file()},
+            "database": {"ready": database_ready, "error": database_error},
             "providers": {
                 name: {
                     "has_key": bool(get_env_value(PROVIDER_ENV_KEYS[name], PROVIDER_ENV_ALIASES[name])),
@@ -192,6 +290,17 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 for name in PROVIDERS
             },
         }
+    @app.get("/api/health")
+    def health() -> Response:
+        ready, _ = readiness_details()
+        content = {"status": "ok" if ready else "degraded", "version": app.version, "ready": ready}
+        return JSONResponse(status_code=200 if ready else 503, content=content)
+
+    @app.get("/api/status")
+    def status() -> Response:
+        ready, details = readiness_details()
+        content = {"status": "ok" if ready else "degraded", "version": app.version, "ready": ready, **details}
+        return JSONResponse(status_code=200 if ready else 503, content=content)
 
     @app.get("/api/options")
     def options() -> dict[str, Any]:
@@ -270,7 +379,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         for upload in files:
             data = upload.file.read(settings.max_upload_mb * 1024 * 1024 + 1)
             try:
-                validate_image_bytes(data, settings.max_upload_mb)
+                validate_image_bytes(data, settings.max_upload_mb, settings.max_image_pixels)
             except ValueError as error:
                 raise HTTPException(status_code=422, detail=f"{upload.filename}: {error}") from None
             images.append(data)
@@ -531,7 +640,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             raise HTTPException(status_code=422, detail="Bilinmeyen yapay zekâ sağlayıcısı.")
         data = file.file.read(settings.max_upload_mb * 1024 * 1024 + 1)
         try:
-            validate_image_bytes(data, settings.max_upload_mb)
+            validate_image_bytes(data, settings.max_upload_mb, settings.max_image_pixels)
         except ValueError as error:
             raise HTTPException(status_code=422, detail=str(error)) from None
         key = provider_key(provider, x_provider_key, settings)
@@ -628,6 +737,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         data = frame.file.read(MAX_FRAME_BYTES + 1)
         if len(data) > MAX_FRAME_BYTES:
             raise HTTPException(status_code=413, detail="Önizleme karesi çok büyük.")
+        try:
+            validate_image_bytes(data, 2, MAX_FRAME_PIXELS)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from None
         image = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
         if image is None:
             raise HTTPException(status_code=422, detail="Önizleme karesi okunamadı.")
@@ -642,6 +755,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             if path.startswith("api/"):
                 # Unknown API routes stay JSON 404s instead of silently returning the app shell.
                 raise HTTPException(status_code=404, detail="Böyle bir API adresi yok.")
+            if settings.public_deployment and path in {"docs", "redoc", "openapi.json"}:
+                raise HTTPException(status_code=404, detail="Böyle bir adres yok.")
             candidate = (FRONTEND_DIST / path).resolve()
             if path and candidate.is_file() and FRONTEND_DIST.resolve() in candidate.parents:
                 return FileResponse(candidate)

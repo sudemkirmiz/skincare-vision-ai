@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+/* oxlint-disable react/only-export-components -- the UI kit intentionally exports one pure score helper */
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { Close, Info, StatusGood, StatusMid, StatusPriority, StatusWatch } from '../icons'
 

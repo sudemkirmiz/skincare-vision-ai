@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+/* oxlint-disable react/only-export-components -- capability detection belongs with the capture component */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Camera, CheckCircle, Close, FaceScan, Plus } from '../icons'
 import { api } from '../lib/api'

@@ -87,6 +87,12 @@ def cache_key(image_path: Path, provider: str, hf_model: str | None, yolo_json: 
     return digest.hexdigest()
 
 
+def health_key(target: ProviderTarget) -> str:
+    """Scope cooldowns to a credential so one bad personal key cannot bench everyone."""
+    fingerprint = hashlib.sha256(target.api_key.strip().encode("utf-8")).hexdigest()[:16]
+    return f"{target.provider}:{fingerprint}"
+
+
 class VLMRouter:
     def __init__(self, engine: VLMEngine, health: ProviderHealth | None = None, cache: ResponseCache | None = None) -> None:
         self.engine = engine
@@ -116,7 +122,8 @@ class VLMRouter:
             if not target.api_key.strip():
                 attempts.append({"provider": target.provider, "status": "skipped", "kind": "missing_key"})
                 continue
-            benched = self.health.blocked_reason(target.provider)
+            scoped_health_key = health_key(target)
+            benched = self.health.blocked_reason(scoped_health_key)
             if benched:
                 kind, seconds_left = benched
                 attempts.append({"provider": target.provider, "status": "skipped", "kind": kind, "seconds_left": seconds_left})
@@ -133,14 +140,14 @@ class VLMRouter:
                     hf_provider=hf_provider,
                 )
             except VLMProviderError as error:
-                self.health.mark_failure(target.provider, error.kind, error.retry_after)
+                self.health.mark_failure(scoped_health_key, error.kind, error.retry_after)
                 attempts.append({
                     "provider": target.provider, "status": "failed", "kind": error.kind,
                     "error": str(error)[:300], "seconds": round(time.perf_counter() - started, 2),
                 })
                 logger.warning("VLM provider failed provider=%s kind=%s", target.provider, error.kind)
                 continue
-            self.health.mark_success(target.provider)
+            self.health.mark_success(scoped_health_key)
             attempts.append({"provider": target.provider, "status": "ok", "seconds": round(time.perf_counter() - started, 2)})
             output["cached"] = False
             self.cache.put(key, output)

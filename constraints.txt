@@ -1,0 +1,21 @@
+# Tested direct dependency set. Keep requirements*.txt as supported ranges and use
+# this file in CI/Docker for reproducible installs. Regenerate after an intentional upgrade.
+numpy==2.5.4
+opencv-python==4.14.0.94
+Pillow==13.0.0
+ultralytics==8.4.187
+requests==2.34.2
+fastapi==0.162.0
+uvicorn==0.54.0
+python-multipart==0.0.32
+pydantic==2.14.1
+reportlab==5.1.0
+absl-py==2.5.1
+flatbuffers==25.12.19
+sounddevice==0.5.6
+pytest==9.1.1
+ruff==0.17.2
+pypdf==6.21.2
+httpx==0.28.1
+bandit==1.9.4
+PyYAML==6.0.3

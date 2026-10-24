@@ -12,7 +12,12 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init)
+  let token = ''
+  try { token = sessionStorage.getItem('scv.accessToken') ?? '' } catch { /* storage may be unavailable */ }
+  const requestInit = token
+    ? (() => { const headers = new Headers(init?.headers); headers.set('Authorization', `Bearer ${token}`); return { ...init, headers } })()
+    : init
+  const response = await fetch(path, requestInit)
   if (!response.ok) {
     let messages = ['Beklenmeyen bir hata oluştu; lütfen tekrar deneyin.']
     try {
@@ -50,7 +55,13 @@ export interface AnalyzeOptions {
 }
 
 export const api = {
-  health: () => request<Health>('/api/health'),
+  setAccessToken: (token: string) => {
+    try {
+      if (token.trim()) sessionStorage.setItem('scv.accessToken', token.trim())
+      else sessionStorage.removeItem('scv.accessToken')
+    } catch { /* storage may be unavailable */ }
+  },
+  health: () => request<Health>('/api/status'),
   options: () => request<Options>('/api/options'),
   quiz: (answers: Record<string, string | null>) => request<{ skin_type: string | null; label: string | null }>('/api/quiz/skin-type', json('POST', answers)),
 

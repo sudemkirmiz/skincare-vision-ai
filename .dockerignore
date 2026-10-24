@@ -1,4 +1,6 @@
 .env
+.env.production
+.env.*.local
 .venv/
 venv/
 env/
@@ -20,4 +22,5 @@ data/history.db*
 frontend/node_modules/
 frontend/dist/
 frontend/test-results/
+frontend/playwright-report/
 screenshots/

@@ -83,6 +83,11 @@ def test_exports_exclude_thumbnail_bytes(store):
     assert "60" in csv_text.splitlines()[1]
 
 
+def test_csv_export_escapes_formula_like_notes(store):
+    store.save(record_from_payload(payload("a1"), "Ben", note='=HYPERLINK("https://example.test")'))
+    assert "'=HYPERLINK" in store.export_csv("Ben")
+
+
 def test_compare_reports_improvement_and_noise():
     store_records = []
     before = record_from_payload(payload("a", overall=45, spots=20, cheek=8, scores={"spots": 40, "redness": 40, "tone": 60, "texture": 60, "shine": 60}), "Ben")

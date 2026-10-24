@@ -25,3 +25,6 @@ def test_settings_fall_back_on_bad_values(monkeypatch):
     assert settings.yolo_confidence == 0.10
     assert settings.allow_user_api_keys is False
     assert settings.yolo_model_path.is_absolute()
+    assert settings.analysis_rate_limit > 0 and settings.label_rate_limit > 0
+    assert settings.capture_rate_limit > 0
+    assert settings.max_request_body_mb >= 2

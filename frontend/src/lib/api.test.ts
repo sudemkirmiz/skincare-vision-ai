@@ -47,4 +47,13 @@ describe('api requests', () => {
     expect(init?.headers).toEqual({ 'X-Provider-Key': 'hf_abc' })
     expect((init!.body as FormData).get('hf_model')).toBe('org/model')
   })
+
+  it('adds the optional app access token without exposing it in request bodies', async () => {
+    api.setAccessToken(' app-secret ')
+    const spy = mockFetch(200, [])
+    await api.profiles()
+    const headers = new Headers(spy.mock.calls[0][1]?.headers)
+    expect(headers.get('Authorization')).toBe('Bearer app-secret')
+    api.setAccessToken('')
+  })
 })

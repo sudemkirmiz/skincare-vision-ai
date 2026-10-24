@@ -1,7 +1,7 @@
-/// <reference types="vitest/config" />
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { configDefaults } from 'vitest/config'
 
 // Dev: the React app runs on :5173 and forwards /api to FastAPI on :8000.
 // Prod: `npm run build` output (dist/) is served by FastAPI itself, same origin.
@@ -15,6 +15,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     css: false,
   },
 })

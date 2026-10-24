@@ -104,6 +104,13 @@ EVENT_KINDS = {"routine_start": "Rutine başlandı", "routine_change": "Rutin de
 MAX_PERSON_LENGTH = 40
 
 
+def csv_safe(value: Any) -> Any:
+    """Prevent spreadsheet programs from interpreting exported user text as a formula."""
+    if isinstance(value, str) and value.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")):
+        return "'" + value
+    return value
+
+
 @dataclass
 class HistoryRecord:
     id: str
@@ -196,6 +203,11 @@ class HistoryStore:
                 for statement in MIGRATIONS[target]:
                     connection.execute(statement)
                 connection.execute(f"PRAGMA user_version = {target}")
+
+    def check(self) -> None:
+        """Raise when the database cannot be opened or its schema is unavailable."""
+        with self._connect() as connection:
+            connection.execute("SELECT 1 FROM profiles LIMIT 1").fetchone()
 
     # --- analyses ---------------------------------------------------------
     def save(self, record: dict[str, Any]) -> str:
@@ -425,7 +437,7 @@ class HistoryStore:
                 *[record.scores.get(k) for k in score_keys],
                 record.spot_counts.get("total"),
                 *[record.regions.get(k) for k in region_keys],
-                record.note,
+                csv_safe(record.note),
             ])
         return buffer.getvalue()
 

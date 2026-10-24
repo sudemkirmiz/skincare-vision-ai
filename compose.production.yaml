@@ -1,0 +1,11 @@
+services:
+  app:
+    environment:
+      PUBLIC_DEPLOYMENT: "true"
+      ALLOW_USER_API_KEYS: "false"
+      APP_ACCESS_TOKEN: ${APP_ACCESS_TOKEN:?APP_ACCESS_TOKEN tanımlanmalıdır}
+      # Internal healthcheck uses 127.0.0.1; the public hostname is appended.
+      ALLOWED_HOSTS: 127.0.0.1,localhost,${ALLOWED_HOSTS:?ALLOWED_HOSTS tanımlanmalıdır}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS tanımlanmalıdır}
+      HISTORY_DB_PATH: /app/state/history.db
+    restart: always

@@ -1,8 +1,8 @@
 """Editable product catalog (data/products.json) matched against the routine.
 
-The catalog ships empty on purpose: product names, formulas and prices change, so they
-are curated by the project owner rather than invented. When nothing in the catalog fits
-a routine step, store search links built from that step are shown instead.
+The starter catalog contains a deliberately small set verified against manufacturers'
+official Turkish pages. When nothing in the catalog fits a routine step, store search
+links built from that step are shown instead. Users are always told to verify the label.
 """
 from __future__ import annotations
 
@@ -42,6 +42,18 @@ ACTIVE_QUERY = {
     "tone_brightener": "alfa arbutin serum",
     "hyaluronic": "hyaluronik asit serum",
     "clay_mask": "kil maskesi",
+}
+ACTIVE_CATEGORIES = {
+    "clay_mask": {"mask"},
+    "aha": {"exfoliant", "serum"},
+    "bha": {"exfoliant", "serum"},
+    "retinol": {"serum"},
+    "azelaic": {"serum"},
+    "vitamin_c": {"serum"},
+    "niacinamide": {"serum"},
+    "hyaluronic": {"serum"},
+    "soothing": {"serum"},
+    "tone_brightener": {"serum"},
 }
 # `icon` is a file name in assets/stores/ (the store's own favicon, stored locally so no third-party request is made).
 DEFAULT_SEARCH_PROVIDERS = [
@@ -182,7 +194,9 @@ def recommend_products(routine: dict, profile: SkinProfile, catalog: Catalog) ->
     for active in routine.get("actives", []):
         if active.get("already_using"):
             continue
-        products = _rank_products(catalog.products, profile, routine, active["id"])
+        allowed_categories = ACTIVE_CATEGORIES.get(active["id"], {"serum", "exfoliant", "mask"})
+        candidates = [product for product in catalog.products if product.category in allowed_categories]
+        products = _rank_products(candidates, profile, routine, active["id"])
         sections.append({
             "title": active["name"],
             "products": products,

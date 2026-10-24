@@ -51,8 +51,11 @@ def analysis(client, profile):
 
 def test_health_and_options_never_expose_keys(client):
     health = client.get("/api/health").json()
-    assert health["status"] == "ok" and set(health["providers"]) == {"Gemini", "Hugging Face", "Groq"}
-    body = client.get("/api/health").text + client.get("/api/options").text
+    assert health["status"] == "ok" and health["ready"] is True
+    assert set(health) == {"status", "version", "ready"}
+    status = client.get("/api/status").json()
+    assert set(status["providers"]) == {"Gemini", "Hugging Face", "Groq"}
+    body = client.get("/api/health").text + client.get("/api/status").text + client.get("/api/options").text
     for name in ("GEMINI_API_KEY", "GROQ_API_KEY", "HF_TOKEN"):
         value = os.getenv(name, "")
         if value:
@@ -71,6 +74,7 @@ def test_quiz_endpoint(client):
 def test_profile_validation_and_crud(client, profile):
     errors = client.post("/api/profiles", json={"display_name": "A"}).json()["detail"]["errors"]
     assert len(errors) == 6
+    assert client.post("/api/profiles", json={**PROFILE, "unexpected": "field"}).status_code == 422
     male = client.post("/api/profiles", json={**PROFILE, "display_name": "Can", "gender": "male", "skin": {**PROFILE["skin"], "pregnancy": None}})
     assert male.status_code == 201 and male.json()["skin"]["pregnancy"] == "no"
     assert {p["display_name"] for p in client.get("/api/profiles").json()} >= {"Ayşe", "Can"}
@@ -152,6 +156,68 @@ def test_analysis_cache_ttl_and_owner():
     assert cache.get("a", "p1") == {"analysis_id": "a"} and cache.get("a", "p2") is None
     now[0] = 11
     assert cache.get("a", "p1") is None
+
+
+def test_optional_app_access_token(tmp_path):
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "auth.db", app_access_token="secret-token")
+    with TestClient(create_app(settings, Container(settings))) as secured:
+        assert secured.get("/api/health").status_code == 200
+        assert secured.get("/api/status").status_code == 401
+        assert secured.get("/api/options").status_code == 401
+        assert secured.get("/api/options", headers={"Authorization": "Bearer wrong"}).status_code == 401
+        assert secured.get("/api/options", headers={"Authorization": "Bearer secret-token"}).status_code == 200
+
+
+def test_public_mode_fails_closed_without_safe_settings(tmp_path):
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "public.db", public_deployment=True, app_access_token="")
+    with pytest.raises(RuntimeError, match="APP_ACCESS_TOKEN"):
+        create_app(settings)
+    short = dataclasses.replace(settings, app_access_token="too-short", allow_user_api_keys=False)
+    with pytest.raises(RuntimeError, match="32 karakterli"):
+        create_app(short)
+
+
+def test_health_is_not_ready_without_required_model(tmp_path):
+    settings = dataclasses.replace(
+        get_settings(), history_db_path=tmp_path / "health.db", history_enabled=False, yolo_model_path=tmp_path / "missing.pt"
+    )
+    with TestClient(create_app(settings, Container(settings))) as unhealthy:
+        response = unhealthy.get("/api/health")
+        assert response.status_code == 503
+        assert response.json()["status"] == "degraded"
+        assert unhealthy.get("/api/status").json()["models"]["yolo"] is False
+
+
+def test_request_body_limit_is_applied_before_json_parsing(tmp_path):
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "body.db", max_request_body_mb=2)
+    with TestClient(create_app(settings, Container(settings))) as limited:
+        response = limited.post("/api/profiles", content=b"x" * (2 * 1024 * 1024 + 1), headers={"Content-Type": "application/json"})
+        assert response.status_code == 413
+        assert response.headers["x-content-type-options"] == "nosniff"
+
+
+def test_public_mode_security_headers_and_docs(tmp_path):
+    settings = dataclasses.replace(
+        get_settings(), history_db_path=tmp_path / "public-secure.db", public_deployment=True,
+        app_access_token="a" * 32, allow_user_api_keys=False,
+    )
+    with TestClient(create_app(settings, Container(settings))) as public:
+        health = public.get("/api/health")
+        assert health.headers["x-frame-options"] == "DENY"
+        assert "default-src 'self'" in health.headers["content-security-policy"]
+        assert health.headers["strict-transport-security"].startswith("max-age=")
+        assert public.get("/docs").status_code == 404
+        assert public.get("/openapi.json").status_code == 404
+
+
+def test_public_mode_rejects_wildcard_hosts(tmp_path, monkeypatch):
+    monkeypatch.setenv("ALLOWED_HOSTS", "*")
+    settings = dataclasses.replace(
+        get_settings(), history_db_path=tmp_path / "host.db", public_deployment=True,
+        app_access_token="a" * 32, allow_user_api_keys=False,
+    )
+    with pytest.raises(RuntimeError, match="ALLOWED_HOSTS"):
+        create_app(settings)
 
 
 def test_frontend_shell_and_unknown_api_route(client):

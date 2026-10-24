@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+/* oxlint-disable react/only-export-components -- result components share the tested totalSpots helper */
 import { Alert, CheckCircle, FaceScan, Info, Lightbulb, Sparkles } from '../icons'
 import type { Analysis } from '../lib/types'
 import { Card, Meter, Notice, ScoreRing, SectionHeader, StatusBadge } from './ui'

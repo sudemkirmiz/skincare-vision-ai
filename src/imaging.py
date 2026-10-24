@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from io import BytesIO
 from pathlib import Path
 
@@ -33,12 +34,19 @@ def write_image(image: np.ndarray, output_path: str | Path, quality: int = 92) -
     return output_path
 
 
-def validate_image_bytes(data: bytes, max_mb: int) -> None:
-    """Size limit + real image check (Pillow verify also catches decompression bombs)."""
+def validate_image_bytes(data: bytes, max_mb: int, max_pixels: int = 40_000_000) -> None:
+    """Validate encoded size, decoded dimensions and image integrity before processing."""
     if len(data) > max_mb * 1024 * 1024:
         raise ValueError(f"Dosya çok büyük. En fazla {max_mb} MB yükleyebilirsiniz.")
     try:
-        with Image.open(BytesIO(data)) as image:
-            image.verify()
-    except (UnidentifiedImageError, Image.DecompressionBombError, OSError, SyntaxError) as error:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(BytesIO(data)) as image:
+                width, height = image.size
+                if width <= 0 or height <= 0 or width * height > max_pixels:
+                    raise ValueError(f"Görsel çözünürlüğü çok yüksek. En fazla {max_pixels:,} piksel kullanabilirsiniz.")
+                image.verify()
+    except ValueError:
+        raise
+    except (UnidentifiedImageError, Image.DecompressionBombError, Image.DecompressionBombWarning, OSError, SyntaxError) as error:
         raise ValueError("Dosya geçerli bir görsel değil veya bozuk.") from error
