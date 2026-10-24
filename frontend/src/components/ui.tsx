@@ -87,7 +87,7 @@ export function Notice({ tone = 'info', children, icon }: { tone?: 'info' | 'war
 
 export function Tabs<T extends string>({ tabs, value, onChange, label }: { tabs: { id: T; label: string; icon?: ReactNode }[]; value: T; onChange: (id: T) => void; label: string }) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b border-line sm:gap-6">
+    <div role="tablist" aria-label={label} className="no-scrollbar flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line sm:gap-6">
       {tabs.map((tab) => (
         <button
           key={tab.id}

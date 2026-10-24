@@ -90,7 +90,7 @@ function CheckIn({ data, day, setDay }: { data: JournalResponse; day: string; se
   return (
     <Card className="p-6 sm:p-7">
       <SectionHeader icon={<Calendar />} title="Günlük kayıt" subtitle="Bir dakikanızı alır. Düzenli kayıt, cildinizi neyin etkilediğini görmenizi sağlar." />
-      <div className="-mx-1 mb-6 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Gün">
+      <div className="no-scrollbar -mx-1 mb-6 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Gün">
         {Array.from({ length: EDIT_DAYS }, (_, index) => iso(daysAgo(index))).map((date) => {
           const logged = data.entries.some((entry) => entry.date === date)
           return (

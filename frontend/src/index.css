@@ -104,6 +104,14 @@
   @apply w-full rounded-[10px] border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none;
 }
 
+/* Horizontal chip and tab rows still scroll by swipe or trackpad, without a visible scrollbar (Windows draws arrows). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

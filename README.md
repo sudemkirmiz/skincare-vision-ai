@@ -6,6 +6,10 @@ FastAPI · React 19 · TypeScript · Tailwind CSS v4 · YOLO · MediaPipe · Ope
 
 > **Not a medical device.** The app gives a cosmetic, visual pre-assessment only. It does not diagnose, name diseases, recommend prescription products or replace a dermatologist.
 
+<p align="center">
+  <img src="screenshots/cilt-analizi.png" alt="Analysis result: Skin Score ring, marked face regions, key findings and the AI comment" width="100%">
+</p>
+
 ---
 
 ## Features
@@ -31,6 +35,45 @@ FastAPI · React 19 · TypeScript · Tailwind CSS v4 · YOLO · MediaPipe · Ope
 **Helpers**
 - **Skin weather**: today's UV, temperature and humidity (Open-Meteo) turned into profile-aware tips.
 - **Skin coach** chat grounded in the profile, routine, shelf, journal and weather.
+
+## Screenshots
+
+**1 · Onboarding** — required basics first (gender decides whether the pregnancy question applies), then optional details that make the routine more precise.
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/profil1.png" alt="Onboarding step 1: basic information and consent"></td>
+    <td width="50%"><img src="screenshots/profil2.png" alt="Onboarding step 2: goals, current actives and sensitivities"></td>
+  </tr>
+</table>
+
+**2 · Products and skin coach** — the product shelf with missing-step hints, and the coach chat next to today's skin weather.
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/urunler.png" alt="Product shelf: adding a product and missing-step hints"></td>
+    <td width="50%"><img src="screenshots/cilt-kocu.png" alt="Skin coach chat and the skin weather card"></td>
+  </tr>
+</table>
+
+**3 · Daily journal** — routine adherence, skin feel, triggers and symptoms, a 4-week calendar and personal insights.
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/gunluk-takip.png" alt="Daily journal entry with streak, adherence and weather"></td>
+    <td width="50%"><img src="screenshots/gunluk-takip-devam.png" alt="Four-week calendar and personal insights"></td>
+  </tr>
+</table>
+
+**4 · History** — trends with the AI settings drawer, the aligned before/after slider with score and region deltas, and data management.
+
+<table>
+  <tr>
+    <td width="33%"><img src="screenshots/gecmis-ve-ayarlar.png" alt="Skin Score trends and the AI settings drawer"></td>
+    <td width="33%"><img src="screenshots/gecmis-devam.png" alt="Aligned before/after comparison slider"></td>
+    <td width="33%"><img src="screenshots/gecmis-son.png" alt="Routine events, saved records and the profile menu"></td>
+  </tr>
+</table>
 
 ## Architecture
 
@@ -210,6 +253,7 @@ tests/              pytest suite (offline)
 data/               products.json (catalog, starts empty) and products.example.json
 models/             YOLO weights and MediaPipe face landmarker
 docs/               dataset and training notes for the YOLO model
+screenshots/        README screenshots
 ```
 
 ## YOLO model
