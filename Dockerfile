@@ -25,9 +25,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     NUMBA_CACHE_DIR=/tmp/numba \
     HOME=/home/appuser
 
-# OpenCV/Torch runtime libraries and an init process for clean signal handling.
+# OpenCV/Torch/MediaPipe runtime libraries (MediaPipe needs EGL even on CPU) and an init process for clean signal handling.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates libgl1 libglib2.0-0 libgomp1 libportaudio2 tini \
+    && apt-get install -y --no-install-recommends ca-certificates libgl1 libglib2.0-0 libegl1 libgles2 libgomp1 libportaudio2 tini \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

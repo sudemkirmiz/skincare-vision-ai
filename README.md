@@ -16,7 +16,7 @@
 <p align="center">
   <a href="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/ci.yml"><img src="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/codeql.yml"><img src="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/codeql.yml/badge.svg" alt="CodeQL status"></a>
-  <img src="https://img.shields.io/badge/tests-272_passing-4caf50" alt="272 automated tests">
+  <img src="https://img.shields.io/badge/tests-273_passing-4caf50" alt="273 automated tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="AGPL-3.0 license"></a>
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10 or later">
   <img src="https://img.shields.io/badge/React_19-TypeScript-3178C6?logo=typescript&logoColor=white" alt="React 19 and TypeScript">
@@ -50,7 +50,7 @@
   <tr>
     <td valign="top"><b>Built for daily use</b><br>Installable PWA, guided camera capture, one-tap routine check-in, streaks and badges, on-device reminders, personal trigger insights, light and dark themes.</td>
     <td valign="top"><b>Private by design</b><br>Photos never touch the disk. Each browser sees only its own profiles on a shared link. Strict CSP, constant-time token checks, CSRF-safe cookies, request limits before parsing, a hardened read-only container.</td>
-    <td valign="top"><b>Tested like a product</b><br>247 backend tests (including a route-by-route security suite), 22 frontend unit tests and Playwright end-to-end tests, all offline. CI runs Ruff, Bandit, CodeQL, pip-audit, npm audit, type checks and a Docker build on every push.</td>
+    <td valign="top"><b>Tested like a product</b><br>248 backend tests (including a route-by-route security suite), 22 frontend unit tests and Playwright end-to-end tests, all offline. CI runs Ruff, Bandit, CodeQL, pip-audit, npm audit, type checks and a Docker build on every push.</td>
   </tr>
 </table>
 

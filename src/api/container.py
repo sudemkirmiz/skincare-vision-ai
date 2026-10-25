@@ -76,7 +76,12 @@ class Container:
         if not (mediapipe_available() and self.settings.face_landmarker_path.exists()):
             logger.warning("Face landmarker unavailable; using Haar face detection")
             return None
-        return FaceLandmarkAnalyzer(self.settings.face_landmarker_path)
+        try:
+            return FaceLandmarkAnalyzer(self.settings.face_landmarker_path)
+        except (OSError, RuntimeError, ValueError) as error:
+            # e.g. a missing system library (libEGL) on a slim image: degrade to Haar instead of failing every request.
+            logger.warning("Face landmarker could not start (%s); using Haar face detection", error)
+            return None
 
     @cached_property
     def service(self) -> AnalysisService:

@@ -361,3 +361,20 @@ def test_public_mode_allows_bring_your_own_key_when_enabled(tmp_path):
     with TestClient(create_app(settings, Container(settings)), base_url="http://localhost") as public:
         options = public.get("/api/options", headers={"Authorization": "Bearer " + "x" * 40}).json()
         assert options["flags"]["allow_user_api_keys"] is True and options["flags"]["device_scoped"] is True
+
+
+def test_missing_system_library_falls_back_to_haar(tmp_path, monkeypatch):
+    """A slim server without libEGL must keep working (Haar face detection), not answer 500 everywhere."""
+    import api.container as container_module
+
+    def broken(*_args, **_kwargs):
+        raise OSError("libEGL.so.1: cannot open shared object file")
+
+    monkeypatch.setattr(container_module, "FaceLandmarkAnalyzer", broken)
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "egl.db")
+    container = Container(settings)
+    assert container.landmarks is None
+    with TestClient(create_app(settings, container)) as degraded:
+        assert degraded.get("/api/health").status_code in {200, 503}
+        assert degraded.get("/api/options").status_code == 200
+        assert degraded.get("/api/status").json()["models"]["landmarks"] is False

@@ -16,7 +16,7 @@
 <p align="center">
   <a href="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/ci.yml"><img src="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/ci.yml/badge.svg" alt="CI durumu"></a>
   <a href="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/codeql.yml"><img src="https://github.com/sudemkirmiz/skincare-vision-ai/actions/workflows/codeql.yml/badge.svg" alt="CodeQL durumu"></a>
-  <img src="https://img.shields.io/badge/testler-272_ba%C5%9Far%C4%B1l%C4%B1-4caf50" alt="272 otomatik test">
+  <img src="https://img.shields.io/badge/testler-273_ba%C5%9Far%C4%B1l%C4%B1-4caf50" alt="273 otomatik test">
   <a href="LICENSE"><img src="https://img.shields.io/badge/lisans-AGPL--3.0-blue.svg" alt="AGPL-3.0 lisansı"></a>
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10 veya üstü">
   <img src="https://img.shields.io/badge/React_19-TypeScript-3178C6?logo=typescript&logoColor=white" alt="React 19 ve TypeScript">
@@ -50,7 +50,7 @@
   <tr>
     <td valign="top"><b>Günlük kullanım için</b><br>Kurulabilir PWA, rehberli kamera çekimi, tek dokunuşla rutin işaretleme, seri ve rozetler, cihaz üzerinde hatırlatıcılar, kişisel tetikleyici içgörüleri, açık ve koyu tema.</td>
     <td valign="top"><b>Gizlilik temelden</b><br>Fotoğraflar diske yazılmaz. Paylaşılan bir bağlantıda her tarayıcı yalnızca kendi profillerini görür. Sıkı CSP, sabit zamanlı anahtar karşılaştırması, CSRF'e dayanıklı çerezler, ayrıştırmadan önce istek sınırları, sertleştirilmiş salt okunur container.</td>
-    <td valign="top"><b>Ürün gibi test edilir</b><br>247 backend testi (rota rota güvenlik testleri dahil), 22 frontend birim testi ve Playwright uçtan uca testleri; hepsi çevrimdışı. CI her push'ta Ruff, Bandit, CodeQL, pip-audit, npm audit, tür denetimi ve Docker derlemesi çalıştırır.</td>
+    <td valign="top"><b>Ürün gibi test edilir</b><br>248 backend testi (rota rota güvenlik testleri dahil), 22 frontend birim testi ve Playwright uçtan uca testleri; hepsi çevrimdışı. CI her push'ta Ruff, Bandit, CodeQL, pip-audit, npm audit, tür denetimi ve Docker derlemesi çalıştırır.</td>
   </tr>
 </table>
 

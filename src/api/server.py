@@ -333,7 +333,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 database_ready, database_error = False, type(error).__name__
         ready = yolo_ready and database_ready
         return ready, {
-            "models": {"yolo": yolo_ready, "landmarks": settings.face_landmarker_path.is_file()},
+            # Whether the landmarker actually started, not just whether its file exists (it can fail on missing libEGL).
+            "models": {"yolo": yolo_ready, "landmarks": settings.face_landmarker_path.is_file() and services.landmarks is not None},
             "database": {"ready": database_ready, "error": database_error},
             "providers": {
                 name: {
