@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, api } from './api'
 
@@ -44,7 +46,10 @@ describe('api requests', () => {
     const spy = mockFetch(200, {})
     await api.analyze({ profileId: 'p1', files: [new File(['x'], 'a.png')], provider: 'Hugging Face', useVlm: true, secondOpinion: false, hfModel: 'org/model', providerKey: ' hf_abc ' })
     const [, init] = spy.mock.calls[0]
-    expect(init?.headers).toEqual({ 'X-Provider-Key': 'hf_abc' })
+    const headers = new Headers(init?.headers)
+    expect(headers.get('X-Provider-Key')).toBe('hf_abc')
+    // Every request also identifies the browser, for device-scoped profiles on a shared link.
+    expect(headers.get('X-Device-Key')).toMatch(/^[a-f0-9]{48}$/)
     expect((init!.body as FormData).get('hf_model')).toBe('org/model')
   })
 

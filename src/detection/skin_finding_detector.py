@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from __future__ import annotations
 
 import json
@@ -10,7 +12,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-from imaging import read_image, write_image
+from preprocessing.imaging import read_image, write_image
 
 
 @dataclass(frozen=True)

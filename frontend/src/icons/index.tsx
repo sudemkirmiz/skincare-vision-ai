@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 /**
  * SkinCare Vision AI icon set.
  *
@@ -35,14 +37,41 @@ function Icon({ size = 22, title, children, ...rest }: IconProps & { children: R
 /** Soft duotone fill used inside the primary shape. */
 const Soft = ({ d }: { d: string }) => <path d={d} fill="currentColor" fillOpacity={0.14} stroke="none" />
 
-export const LogoMark = (p: IconProps) => (
-  <Icon {...p}>
-    <Soft d="M12 3.2c3.6 3.9 6.2 7.2 6.2 10.6A6.2 6.2 0 0 1 12 20a6.2 6.2 0 0 1-6.2-6.2C5.8 10.4 8.4 7.1 12 3.2Z" />
-    <path d="M12 3.2c3.6 3.9 6.2 7.2 6.2 10.6A6.2 6.2 0 0 1 12 20a6.2 6.2 0 0 1-6.2-6.2C5.8 10.4 8.4 7.1 12 3.2Z" />
-    <path d="M12 17.2v-6.4" />
-    <path d="M12 13.4c1.6-.2 2.7-1.2 3-2.8-1.6.1-2.7 1-3 2.8Z" />
-    <path d="M12 15.2c-1.4-.2-2.4-1-2.7-2.4 1.4.1 2.4.9 2.7 2.4Z" />
-  </Icon>
+/*
+ * Brand mark: a drop with a sparkle. Unlike the line icons it is full colour; the colours are theme tokens
+ * (--logo-*) so it follows light and dark mode. The master files live in public/brand/.
+ */
+const DROP = 'M30 10.6C35.4 16.2 46 26.6 46 38.4A16 16 0 0 1 14 38.4C14 26.6 24.6 16.2 30 10.6Z'
+const SPARKLE = 'M30 29.6C31.84 36.96 31.84 36.96 39.2 38.8C31.84 40.64 31.84 40.64 30 48C28.16 40.64 28.16 40.64 20.8 38.8C28.16 36.96 28.16 36.96 30 29.6Z'
+const SPARKLE_SMALL = 'M50.6 8C51.68 12.32 51.68 12.32 56 13.4C51.68 14.48 51.68 14.48 50.6 18.8C49.52 14.48 49.52 14.48 45.2 13.4C49.52 12.32 49.52 12.32 50.6 8Z'
+
+/** `tile` adds the rounded app-icon background; below 28 px the small outer sparkle is dropped, as in the brand sheet. */
+export const LogoMark = ({ size = 28, tile = false, title, className }: { size?: number; tile?: boolean; title?: string; className?: string }) => {
+  const sparkle = size >= 28
+  const transform = tile ? (sparkle ? 'translate(32 32) scale(0.94) translate(-31 -33)' : 'translate(32 32) scale(1.12) translate(-30 -33.6)') : undefined
+  return (
+    <svg width={size} height={size} viewBox={tile ? '0 0 64 64' : sparkle ? '9 5 50 54' : '10 7 40 52'} className={className}
+      aria-hidden={title ? undefined : true} role={title ? 'img' : undefined} focusable="false">
+      {title ? <title>{title}</title> : null}
+      {tile ? <rect width="64" height="64" rx="15" fill="var(--logo-tile)" /> : null}
+      <g transform={transform}>
+        <path d={DROP} fill="var(--logo-fill)" stroke="var(--logo-stroke)" strokeWidth={4.4} strokeLinejoin="round" />
+        <path d={SPARKLE} fill="var(--logo-inner)" />
+        {sparkle ? <path d={SPARKLE_SMALL} fill="var(--logo-outer)" /> : null}
+      </g>
+    </svg>
+  )
+}
+
+/** Mark + two-line wordmark ("SkinCare" / "VİSİON AI") used in the header and onboarding. */
+export const BrandLogo = ({ compact = false }: { compact?: boolean }) => (
+  <span className="flex items-center gap-2.5">
+    <LogoMark size={36} tile className={compact ? 'size-8 sm:size-9' : undefined} />
+    <span className={compact ? 'hidden leading-none md:block' : 'block leading-none'}>
+      <span className="block font-display text-[19px] font-semibold tracking-tight text-ink">SkinCare</span>
+      <span className="mt-0.5 block text-[9.5px] font-semibold tracking-[0.2em] text-brand-600">VİSİON AI</span>
+    </span>
+  </span>
 )
 
 export const FaceScan = (p: IconProps) => (
@@ -310,6 +339,53 @@ export const Pin = (p: IconProps) => (
     <Soft d="M12 3.5a6 6 0 0 1 6 6c0 4.4-6 11-6 11s-6-6.6-6-11a6 6 0 0 1 6-6Z" />
     <path d="M12 3.5a6 6 0 0 1 6 6c0 4.4-6 11-6 11s-6-6.6-6-11a6 6 0 0 1 6-6Z" />
     <circle cx="12" cy="9.5" r="2.2" />
+  </Icon>
+)
+
+export const Monitor = (p: IconProps) => (
+  <Icon {...p}>
+    <Soft d="M4.5 6a1.5 1.5 0 0 1 1.5-1.5h12A1.5 1.5 0 0 1 19.5 6v8a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 14Z" />
+    <rect x="4.5" y="4.5" width="15" height="11" rx="1.5" />
+    <path d="M9 19.5h6M12 15.5v4" />
+  </Icon>
+)
+
+export const Bell = (p: IconProps) => (
+  <Icon {...p}>
+    <Soft d="M6.5 15.5V11a5.5 5.5 0 0 1 11 0v4.5l1.5 2h-14Z" />
+    <path d="M6.5 15.5V11a5.5 5.5 0 0 1 11 0v4.5l1.5 2h-14Z" />
+    <path d="M10.2 20a2 2 0 0 0 3.6 0M12 3.5v2" />
+  </Icon>
+)
+
+export const Flame = (p: IconProps) => (
+  <Icon {...p}>
+    <Soft d="M12 3.5c.6 3 3.2 4.4 4.6 7a6 6 0 1 1-10.8 2.7c.3-1.6 1.2-2.8 2.4-3.6 0 1.6.7 2.6 1.8 3.1C9.6 9.4 10.6 6 12 3.5Z" />
+    <path d="M12 3.5c.6 3 3.2 4.4 4.6 7a6 6 0 1 1-10.8 2.7c.3-1.6 1.2-2.8 2.4-3.6 0 1.6.7 2.6 1.8 3.1C9.6 9.4 10.6 6 12 3.5Z" />
+    <path d="M12 20.5a2.6 2.6 0 0 1-2.6-2.6c0-1.6 1.4-2.4 2.6-4 1.2 1.6 2.6 2.4 2.6 4a2.6 2.6 0 0 1-2.6 2.6Z" />
+  </Icon>
+)
+
+export const Layers = (p: IconProps) => (
+  <Icon {...p}>
+    <Soft d="m12 4 8 4.2-8 4.2-8-4.2Z" />
+    <path d="m12 4 8 4.2-8 4.2-8-4.2Z" />
+    <path d="m4 12 8 4.2 8-4.2M4 15.8 12 20l8-4.2" />
+  </Icon>
+)
+
+export const Hourglass = (p: IconProps) => (
+  <Icon {...p}>
+    <Soft d="M8 19.5c0-3 4-4.2 4-7.5 0 3.3 4 4.5 4 7.5Z" />
+    <path d="M6.5 3.5h11M6.5 20.5h11M8 3.5c0 4 4 5 4 8.5s-4 4.5-4 8.5M16 3.5c0 4-4 5-4 8.5s4 4.5 4 8.5" />
+  </Icon>
+)
+
+export const Share = (p: IconProps) => (
+  <Icon {...p}>
+    <Soft d="M5.5 11.5h13v7a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5Z" />
+    <path d="M8.5 11.5h-3v7A1.5 1.5 0 0 0 7 20h10a1.5 1.5 0 0 0 1.5-1.5v-7h-3" />
+    <path d="M12 14.5V3.5M8.5 7 12 3.5 15.5 7" />
   </Icon>
 )
 

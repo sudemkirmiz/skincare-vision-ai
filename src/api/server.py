@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """FastAPI backend for the React frontend.
 
 Thin HTTP layer over the existing domain code in src/: no analysis logic lives here.
@@ -6,10 +8,13 @@ Run: uvicorn api.server:app --app-dir src --port 8000
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
+import re
 import secrets
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from datetime import date, datetime, timedelta
 from typing import Annotated, Any
 
@@ -28,12 +33,11 @@ from api.container import Container
 from api.rate_limit import RateLimiter
 from api.schemas import CoachIn, EventIn, JournalIn, ProductCheckIn, ProfileIn, QuizIn, SaveAnalysisIn, ShelfItemIn
 from api.security import RequestBodyLimitMiddleware
-from coach import SUGGESTIONS, DailyLimiter, ask, build_context, clean_messages
 from config import PROJECT_ROOT, PROVIDER_ENV_ALIASES, Settings, configure_logging, get_env_value, get_settings, load_env_file
 from history.compare import compare_records, previous_record_comparison, trend_rows
 from history.insights import FEMALE_ONLY_TRIGGERS, INSIGHT_WINDOW_DAYS, SKIN_FEEL, SYMPTOMS, TRIGGERS, build_insights
 from history.store import EVENT_KINDS, record_from_payload, thumbnail_from_data_uri
-from imaging import validate_image_bytes
+from preprocessing.imaging import validate_image_bytes
 from recommendation.catalog import recommend_products
 from recommendation.engine import build_routine
 from recommendation.inci import analyse_inci, evaluate_product, parse_inci
@@ -59,6 +63,8 @@ from recommendation.shelf import CATEGORIES, USAGES, analyse_shelf
 from report.filenames import report_filename
 from report.pdf_report import build_pdf_report
 from report.text_report import build_report_json, build_report_text
+from services.coach import SUGGESTIONS, DailyLimiter, ask, build_context, clean_messages
+from services.weather import WeatherError, skin_tips, uv_band
 from users.profile import (
     ADDRESS_FORMS,
     CONSENT_TEXT,
@@ -71,12 +77,29 @@ from users.profile import (
     profile_photo_mismatches,
     validate_required,
 )
-from vlm_engine import HF_VISION_MODELS, VLMEngine, VLMOptions, VLMProviderError
-from vlm_router import KIND_LABELS
-from weather import WeatherError, skin_tips, uv_band
+from vlm.engine import HF_VISION_MODELS, VLMEngine, VLMOptions, VLMProviderError
+from vlm.router import KIND_LABELS
 
 logger = logging.getLogger("skincare.api")
-PROVIDERS = ["Gemini", "Hugging Face", "Groq"]
+PROVIDERS = ["Gemini", "OpenAI", "Hugging Face", "Groq"]
+# The browser's random device key (cookie or header). Only its hash is stored, as the profile owner.
+DEVICE_COOKIE = "scv_device"
+# The cookie's name, not a secret (Bandit B105 false positive).
+TOKEN_COOKIE = "scv_token"  # nosec B105
+DEVICE_KEY = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
+current_owner: ContextVar[str | None] = ContextVar("current_owner", default=None)
+# Cookies authenticate only reads (images, downloads). Anything that changes data must send headers, which a
+# cross-site form or image cannot do: defence in depth on top of SameSite=Strict.
+COOKIE_METHODS = {"GET", "HEAD"}
+AUTH_FAILURE_LIMIT = 20  # wrong access tokens per IP per hour before the IP is paused
+PROVIDER_KEY = re.compile(r"^[!-~]{8,512}$")  # printable ASCII, no spaces or control characters
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; "
+    "script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; "
+    "connect-src 'self'; worker-src 'self'; manifest-src 'self'; media-src 'self' blob:"
+)
+PERMISSIONS_POLICY = ("camera=(self), geolocation=(self), microphone=(), payment=(), usb=(), serial=(), bluetooth=(), "
+                      "hid=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), browsing-topics=()")
 MAX_VIEWS = 3
 MAX_FRAME_BYTES = 1_500_000
 MAX_FRAME_PIXELS = 2_000_000
@@ -132,7 +155,10 @@ def profile_out(profile: UserProfile) -> dict[str, Any]:
 
 def provider_key(provider: str, typed_key: str | None, settings: Settings) -> str:
     if typed_key and settings.allow_user_api_keys:
-        return typed_key.strip()
+        typed_key = typed_key.strip()
+        if not PROVIDER_KEY.match(typed_key):
+            raise HTTPException(status_code=422, detail="API anahtarı geçersiz görünüyor; boşluk içermeyen anahtarı olduğu gibi yapıştırın.")
+        return typed_key
     return get_env_value(PROVIDER_ENV_KEYS[provider], PROVIDER_ENV_ALIASES[provider])
 
 
@@ -154,7 +180,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     if settings.public_deployment and len(settings.app_access_token) < 32:
         raise RuntimeError("PUBLIC_DEPLOYMENT=true için en az 32 karakterli APP_ACCESS_TOKEN tanımlanmalıdır.")
     if settings.public_deployment and settings.allow_user_api_keys:
-        raise RuntimeError("PUBLIC_DEPLOYMENT=true iken ALLOW_USER_API_KEYS=false olmalıdır.")
+        # Allowed on purpose (friends bring their own key), but say so: keys pass through this server's memory.
+        logger.warning("PUBLIC_DEPLOYMENT with ALLOW_USER_API_KEYS=true: visitors' own keys are relayed through this server")
     services = container or Container(settings)
 
     @asynccontextmanager
@@ -177,14 +204,14 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "same-origin")
-        response.headers.setdefault("Permissions-Policy", "camera=(self), geolocation=(self), microphone=()")
+        response.headers.setdefault("Permissions-Policy", PERMISSIONS_POLICY)
+        response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        response.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
+        response.headers.setdefault("X-Permitted-Cross-Domain-Policies", "none")
+        # Swagger/ReDoc load their own scripts and only exist outside public mode; everything else gets the CSP.
+        if path not in {"/docs", "/redoc"} and not path.startswith("/docs/"):
+            response.headers.setdefault("Content-Security-Policy", CONTENT_SECURITY_POLICY)
         if settings.public_deployment:
-            response.headers.setdefault(
-                "Content-Security-Policy",
-                "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; "
-                "form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-                "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'",
-            )
             response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         if path.startswith("/api/") and path != "/api/health":
             response.headers.setdefault("Cache-Control", "no-store")
@@ -195,12 +222,26 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         path = request.url.path
         protected = path.startswith("/api/") or (not settings.public_deployment and path in {"/docs", "/redoc", "/openapi.json"})
         if protected and path != "/api/health" and request.method != "OPTIONS" and settings.app_access_token:
+            client = request.client.host if request.client else "unknown"
+            paused = rate_limiter.blocked(client, "auth_failure", AUTH_FAILURE_LIMIT)
+            if paused:
+                return harden_response(JSONResponse(
+                    status_code=429, content={"detail": "Çok sayıda hatalı erişim denemesi; lütfen daha sonra tekrar deneyin."},
+                    headers={"Retry-After": str(paused)},
+                ), path)
             authorization = request.headers.get("authorization", "")
             scheme, _, supplied = authorization.partition(" ")
-            valid = scheme.lower() == "bearer" and secrets.compare_digest(
+            if scheme.lower() != "bearer" and request.method in COOKIE_METHODS:
+                # Images and downloads (thumbnails, PDF, exports) cannot send headers; the SameSite cookie covers them.
+                supplied = request.cookies.get(TOKEN_COOKIE, "")
+            elif scheme.lower() != "bearer":
+                supplied = ""
+            valid = bool(supplied) and secrets.compare_digest(
                 supplied.encode("utf-8"), settings.app_access_token.encode("utf-8")
             )
             if not valid:
+                if supplied:
+                    rate_limiter.take(client, "auth_failure", AUTH_FAILURE_LIMIT)
                 return harden_response(JSONResponse(
                     status_code=401,
                     content={"detail": "Bu uygulama için geçerli erişim anahtarı gerekli."},
@@ -225,7 +266,17 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                     headers={"Retry-After": str(retry_after)},
                 ), path)
 
-        response = await call_next(request)
+        owner = None
+        if settings.profile_scope == "device" and path.startswith("/api/") and path not in {"/api/health", "/api/status", "/api/options"}:
+            key = request.headers.get("x-device-key") or (request.cookies.get(DEVICE_COOKIE, "") if request.method in COOKIE_METHODS else "")
+            if not DEVICE_KEY.match(key or ""):
+                return harden_response(JSONResponse(status_code=400, content={"detail": "Cihaz kimliği eksik; sayfayı yenileyin."}), path)
+            owner = hashlib.sha256(key.encode("ascii")).hexdigest()
+        token = current_owner.set(owner)
+        try:
+            response = await call_next(request)
+        finally:
+            current_owner.reset(token)
         return harden_response(response, path)
 
     # Dev server of the React app; in production the API serves the built frontend itself (same origin).
@@ -239,14 +290,16 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         CORSMiddleware,
         allow_origins=origins,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-Provider-Key"],
+        allow_headers=["Authorization", "Content-Type", "X-Provider-Key", "X-Device-Key"],
     )
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
     app.add_middleware(RequestBodyLimitMiddleware, max_bytes=settings.max_request_body_mb * 1024 * 1024)
 
     def get_profile(profile_id: str) -> UserProfile:
         data = services.store.get_profile(profile_id)
-        if data is None:
+        owner = current_owner.get()
+        # Another device's profile looks exactly like a missing one.
+        if data is None or (owner is not None and services.store.profile_owner(profile_id) != owner):
             raise HTTPException(status_code=404, detail="Profil bulunamadı.")
         return UserProfile.from_dict(data)
 
@@ -316,7 +369,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             "hf_models": hf_model_options(settings),
             "default_provider": os.getenv("VLM_PROVIDER", "Gemini") if os.getenv("VLM_PROVIDER", "Gemini") in PROVIDERS else "Gemini",
             "limits": {"max_upload_mb": settings.max_upload_mb, "max_views": MAX_VIEWS},
-            "flags": {"history_enabled": settings.history_enabled, "second_opinion": settings.vlm_second_opinion, "allow_user_api_keys": settings.allow_user_api_keys},
+            "flags": {"history_enabled": settings.history_enabled, "second_opinion": settings.vlm_second_opinion, "allow_user_api_keys": settings.allow_user_api_keys,
+                      "device_scoped": settings.profile_scope == "device"},
         }
 
     @app.post("/api/quiz/skin-type")
@@ -327,12 +381,12 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     # --- profiles ----------------------------------------------------------
     @app.get("/api/profiles")
     def list_profiles() -> list[dict[str, Any]]:
-        return [profile_out(UserProfile.from_dict(data)) for data in services.store.list_profiles()]
+        return [profile_out(UserProfile.from_dict(data)) for data in services.store.list_profiles(current_owner.get())]
 
     @app.post("/api/profiles", status_code=201)
     def create_profile(data: ProfileIn) -> dict[str, Any]:
         profile = profile_from_input(data)
-        services.store.save_profile(profile.to_dict())
+        services.store.save_profile(profile.to_dict(), current_owner.get() or "")
         return profile_out(profile)
 
     @app.get("/api/profiles/{profile_id}")
@@ -384,6 +438,9 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 raise HTTPException(status_code=422, detail=f"{upload.filename}: {error}") from None
             images.append(data)
         fallback_keys = {name: get_env_value(PROVIDER_ENV_KEYS[name], PROVIDER_ENV_ALIASES[name]) for name in PROVIDERS}
+        # The rule-based comment compares with the last saved analysis of this profile.
+        last = next((record for record in reversed(services.store.list(profile_id)) if record.overall_score is not None), None) if settings.history_enabled else None
+        previous = {"overall_score": last.overall_score, "scores": last.scores, "created_at": last.created_at} if last else None
         payload = services.service.analyze_views(
             images,
             provider=provider,
@@ -394,6 +451,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             fallback_keys=fallback_keys,
             personalization=profile.vlm_personalization(),
             second_opinion=settings.vlm_second_opinion if second_opinion is None else second_opinion,
+            previous=previous,
         )
         services.analyses.put(profile_id, payload)
         response = with_routine(payload, profile)
@@ -458,17 +516,23 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         record = services.store.get(record_id)
         if record is None or record.thumbnail is None:
             raise HTTPException(status_code=404, detail="Önizleme yok.")
+        get_profile(record.person)
         return Response(record.thumbnail, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
 
     @app.delete("/api/history/{record_id}", status_code=204)
     def delete_record(record_id: str) -> Response:
         history_guard()
+        record = services.store.get(record_id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="Kayıt bulunamadı.")
+        get_profile(record.person)
         services.store.delete(record_id)
         return Response(status_code=204)
 
     @app.get("/api/profiles/{profile_id}/compare")
     def compare(profile_id: str, before: str, after: str) -> dict[str, Any]:
         history_guard()
+        get_profile(profile_id)
         records = {record.id: record for record in services.store.list(profile_id)}
         if before not in records or after not in records:
             raise HTTPException(status_code=404, detail="Kayıt bulunamadı.")
@@ -478,6 +542,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     @app.get("/api/profiles/{profile_id}/compare/map")
     def compare_map(profile_id: str, before: str, after: str) -> dict[str, Any]:
         history_guard()
+        get_profile(profile_id)
         records = {record.id: record for record in services.store.list(profile_id)}
         if before not in records or after not in records or before == after:
             raise HTTPException(status_code=404, detail="Kayıt bulunamadı.")
@@ -599,6 +664,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     @app.delete("/api/events/{event_id}", status_code=204)
     def delete_event(event_id: str) -> Response:
         history_guard()
+        person = services.store.event_person(event_id)
+        if person is None:
+            raise HTTPException(status_code=404, detail="Olay bulunamadı.")
+        get_profile(person)
         services.store.delete_event(event_id)
         return Response(status_code=204)
 
@@ -647,7 +716,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         if not key:
             raise HTTPException(status_code=422, detail=f"Etiket okumak için {PROVIDER_ENV_KEYS[provider]} gerekli.")
         engine = VLMEngine(VLMOptions(
-            gemini_model=settings.gemini_model, gemini_fallback_models=settings.gemini_fallback_models, groq_model=settings.groq_model,
+            gemini_model=settings.gemini_model, gemini_fallback_models=settings.gemini_fallback_models, groq_model=settings.groq_model, openai_model=settings.openai_model,
             timeout_seconds=settings.vlm_timeout_seconds, max_retries=settings.vlm_max_retries, trust_env_proxy=settings.vlm_trust_env_proxy,
         ))
         try:
@@ -692,7 +761,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             journal_data = journal_summary(profile.id)
         system = build_context(profile, latest, shelf_data, journal_data, body.weather.model_dump() if body.weather else None)
         engine = VLMEngine(VLMOptions(
-            gemini_model=settings.gemini_model, gemini_fallback_models=settings.gemini_fallback_models, groq_model=settings.groq_model,
+            gemini_model=settings.gemini_model, gemini_fallback_models=settings.gemini_fallback_models, groq_model=settings.groq_model, openai_model=settings.openai_model,
             timeout_seconds=settings.vlm_timeout_seconds, max_retries=settings.vlm_max_retries, trust_env_proxy=settings.vlm_trust_env_proxy,
         ))
         try:

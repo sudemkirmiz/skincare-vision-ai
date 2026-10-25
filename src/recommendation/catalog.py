@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Editable product catalog (data/products.json) matched against the routine.
 
 The starter catalog contains a deliberately small set verified against manufacturers'

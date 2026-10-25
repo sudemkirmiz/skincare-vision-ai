@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Merge 1-3 photos of the same face (front, left, right) into one analysis.
 
 Each region is measured in the photo where it is seen best (largest visible share), so

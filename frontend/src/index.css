@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (C) 2026 Sudem Kırmız */
 @import './fonts.css';
 @import 'tailwindcss';
 
@@ -45,9 +47,85 @@
   --color-watch: #ec835a;
   --color-priority: #d03b3b;
 
+  /* Journal "skin feel" scale, 1 (bad) → 5 (great). */
+  --color-feel-1: #f6d5d3;
+  --color-feel-2: #fbe0d3;
+  --color-feel-3: #f7ebc6;
+  --color-feel-4: #d9efd6;
+  --color-feel-5: #b9e3b4;
+
   --radius-card: 0.875rem;
   --shadow-soft: 0 1px 2px rgb(50 80 61 / 0.04), 0 8px 24px rgb(50 80 61 / 0.05);
   --shadow-lift: 0 18px 40px rgb(50 80 61 / 0.14);
+  --glow-a: rgb(165 214 167 / 0.22);
+  --glow-b: rgb(240 200 190 / 0.2);
+}
+
+/* Brand mark colours (see public/brand/). Plain custom properties: used by SVG fills, not utilities. */
+:root {
+  --logo-tile: #edf6ee;
+  --logo-fill: #4caf50;
+  --logo-stroke: #2f6b45;
+  --logo-inner: #ffffff;
+  --logo-outer: #4caf50;
+}
+
+/* `dark:` utilities follow the resolved theme on <html data-theme>, set by /theme-init.js before first paint. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Dark theme: same vivid green, re-tuned for a deep forest canvas. Tinted steps (50–300) become dark
+ * washes and text steps (600–800) become lighter, so every `bg-brand-50 text-brand-700` pair keeps its contrast.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-canvas: #0d1510;
+  --color-surface: #142019;
+  --color-surface-soft: #1a291f;
+  --color-ink: #e7f2e9;
+  --color-ink-soft: #c2d4c6;
+  --color-muted: #8ea395;
+  --color-line: #233529;
+  --color-line-strong: #314a39;
+
+  --color-brand-50: #142a1a;
+  --color-brand-100: #1b3a23;
+  --color-brand-200: #24532f;
+  --color-brand-300: #3a7f46;
+  --color-brand-400: #5bc264;
+  --color-brand-500: #4caf50;
+  --color-brand-600: #72d27a;
+  --color-brand-700: #8fdd95;
+  --color-brand-800: #b8edbb;
+
+  --color-blush-100: #2f1c19;
+  --color-blush-300: #5c362f;
+  --color-blush-500: #e8a090;
+  --color-sand-100: #29240f;
+  --color-sand-300: #5b4d22;
+  --color-danger: #f4a89c;
+  --color-warn-ink: #ead595;
+
+  --color-good: #34c434;
+  --color-mid: #e6a417;
+  --color-watch: #f39672;
+  --color-priority: #f06a6a;
+
+  --color-feel-1: #5a2e2b;
+  --color-feel-2: #5c3a26;
+  --color-feel-3: #524619;
+  --color-feel-4: #285a2c;
+  --color-feel-5: #2f7a35;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  --shadow-lift: 0 18px 40px rgb(0 0 0 / 0.5);
+  --glow-a: rgb(76 175 80 / 0.14);
+  --glow-b: rgb(217 139 122 / 0.08);
+
+  --logo-tile: #1b3324;
+  --logo-stroke: #b9dfbd;
+  --logo-inner: #eef7ef;
+  --logo-outer: #8fcb96;
 }
 
 @layer base {
@@ -59,8 +137,8 @@
   body {
     @apply bg-canvas font-sans text-[15px] text-ink antialiased;
     background-image:
-      radial-gradient(circle at 0% 0%, rgb(165 214 167 / 0.22), transparent 32rem),
-      radial-gradient(circle at 100% 0%, rgb(240 200 190 / 0.2), transparent 28rem);
+      radial-gradient(circle at 0% 0%, var(--glow-a), transparent 32rem),
+      radial-gradient(circle at 100% 0%, var(--glow-b), transparent 28rem);
     background-attachment: fixed;
   }
   h1,
@@ -86,7 +164,7 @@
   @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-45;
 }
 @utility btn-primary {
-  @apply btn bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_rgb(76_175_80/0.25)] hover:shadow-[0_14px_30px_rgb(76_175_80/0.32)];
+  @apply btn bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_rgb(76_175_80/0.25)] hover:shadow-[0_14px_30px_rgb(76_175_80/0.32)] dark:from-[#4caf50] dark:to-[#2e7d32];
 }
 @utility btn-ghost {
   @apply btn border border-line-strong bg-transparent text-ink hover:border-ink/40 hover:bg-surface;

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Facial region masks from MediaPipe's 478-point mesh.
 
 Regions are derived geometrically in a roll-aligned face frame instead of from

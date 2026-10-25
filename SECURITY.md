@@ -1,41 +1,48 @@
-# Güvenlik Politikası
+# Security policy
 
-## Desteklenen sürüm
+## Supported versions
 
-Proje aktif geliştirme aşamasındadır. Güvenlik düzeltmeleri yalnızca `main`
-dalındaki en güncel sürüme uygulanır.
+The project is under active development. Security fixes are applied to the latest version on the `main` branch only.
 
-## Güvenlik açığı bildirme
+## Reporting a vulnerability
 
-Bir güvenlik açığı bulursanız ayrıntıları herkese açık bir issue içinde
-paylaşmayın. Depoda GitHub Private Vulnerability Reporting etkinse **Security →
-Report a vulnerability** yolunu kullanın; etkin değilse depo sahibiyle özel bir
-kanaldan iletişime geçin.
+Please do not disclose a vulnerability in a public issue. Use **Security → Report a vulnerability** (GitHub private vulnerability reporting) on this repository, or contact the maintainer privately through [GitHub](https://github.com/sudemkirmiz).
 
-Bildirimde mümkünse şunları ekleyin:
+If you can, include:
 
-- Etkilenen commit veya sürüm
-- Tekrarlanabilir adımlar ve kavram kanıtı
-- Olası etki ve saldırı ön koşulları
-- Varsa önerilen düzeltme veya geçici önlem
+- the affected commit or version;
+- reproducible steps and a proof of concept;
+- the likely impact and the preconditions of the attack;
+- a suggested fix or workaround, if you have one.
 
-API anahtarı, yüz fotoğrafı, gerçek kullanıcı profili ya da başka kişisel
-verileri rapora eklemeyin. Örneklerde yalnızca sentetik veri kullanın.
+Do not include API keys, face photos, real user profiles or other personal data in the report. Use synthetic data only.
 
-## Güvenlik kapsamı
+## Scope
 
-Özellikle şu konulardaki bildirimler değerlidir:
+Reports in these areas are especially valuable:
 
-- Kimlik doğrulama atlatma veya profil verisine yetkisiz erişim
-- Dosya yolu geçişi, kötü amaçlı görsel işleme veya kaynak tüketimi
-- API anahtarı, fotoğraf, günlük ya da rapor sızıntısı
-- VLM sağlayıcısına gönderilen veride kapsam aşımı
-- Bağımlılık ve tedarik zinciri riskleri
+- authentication bypass or unauthorized access to another profile's data;
+- path traversal, malicious image processing or resource exhaustion;
+- leaks of API keys, photos, journal entries or reports;
+- data sent to an AI provider beyond the documented scope;
+- dependency and supply-chain risks.
 
-## Dağıtım sorumluluğu
+## Built-in protections
 
-Uygulamanın yerleşik erişim anahtarı tek kiracılı kullanım içindir. Birbirinden
-bağımsız kullanıcı hesapları bulunan internet dağıtımlarında kimlik sağlayıcı,
-TLS sonlandırma, merkezi hız sınırı, yedekleme ve izleme sunan bir reverse proxy
-veya platform katmanı kullanılmalıdır. Ayrıntılı kontrol listesi README içindeki
-“Canlı ortama güvenli dağıtım” bölümündedir.
+Each of these is covered by automated tests in `tests/test_security.py` and `tests/test_api.py`:
+
+- Every `/api` route requires the access token (only the `/api/health` readiness probe is open); the token is compared in constant time. The test walks all routes, so a new endpoint cannot ship unprotected.
+- After 20 wrong tokens in an hour, an IP is paused, even for the right token.
+- Cookies authenticate reads (GET/HEAD) only; every request that changes data must send headers, a second CSRF barrier on top of `SameSite=Strict`.
+- With `PROFILE_SCOPE=device` each browser sees only its own profiles, records, journal and shelf; another device's data answers exactly like missing data. The server stores only the SHA-256 hash of the device key.
+- Provider keys typed by users are validated for format and length, never stored on the server and never logged.
+- Host and CORS allowlists; wildcards are rejected in public mode.
+- The request-body limit is enforced before parsing; images are validated for type, integrity, size and decoded pixel count.
+- CSP (as a response header, and as a meta tag in the built page), HSTS, COOP, CORP, X-Frame-Options, nosniff and a restrictive Permissions-Policy.
+- Static file serving cannot leave the build folder; download file names are reduced to ASCII; CSV exports neutralize formula injection.
+- Photos are never written to disk; the service worker caches only the public app shell.
+- CI runs Ruff, Bandit, pip-audit, npm audit and CodeQL; Dependabot watches dependencies.
+
+## Deployment responsibility
+
+The access token and device-scoped profiles are designed for a small group of people who trust each other. An internet service with independent user accounts needs an identity provider, TLS termination, central rate limiting, backups and monitoring in front of the app. See the checklist in [docs/deployment.md](docs/deployment.md).

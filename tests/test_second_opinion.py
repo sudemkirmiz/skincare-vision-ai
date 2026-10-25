@@ -1,7 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import pytest
 
 from analysis.second_opinion import apply_to_metrics, parse_gemini_boxes, reconcile
-from vlm_engine import VLMEngine, VLMProviderError
+from vlm.engine import VLMEngine, VLMProviderError
 
 
 def test_parse_converts_normalised_boxes_and_drops_bad_ones():

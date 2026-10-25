@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """White balance using the eye whites (sclera) as a natural colour reference.
 
 Warm indoor light or a phone's auto white balance shifts skin colour, which moves the

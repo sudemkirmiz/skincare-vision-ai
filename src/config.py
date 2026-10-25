@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from __future__ import annotations
 
 import logging
@@ -70,6 +72,7 @@ class Settings:
     gemini_model: str
     gemini_fallback_models: tuple[str, ...]
     groq_model: str
+    openai_model: str
     hf_model: str
     hf_provider: str
     vlm_timeout_seconds: float
@@ -82,6 +85,7 @@ class Settings:
     max_image_pixels: int
     max_request_body_mb: int
     allow_user_api_keys: bool
+    profile_scope: str
     public_deployment: bool
     app_access_token: str
     analysis_rate_limit: int
@@ -100,11 +104,12 @@ def get_settings() -> Settings:
         history_enabled=_env_bool("HISTORY_ENABLED", True),
         yolo_confidence=_env_float("YOLO_CONFIDENCE", 0.10),
         yolo_image_size=_env_int("YOLO_IMAGE_SIZE", 640),
-        gemini_model=_env_str("GEMINI_MODEL", "gemini-3.5-flash"),
+        gemini_model=_env_str("GEMINI_MODEL", "gemini-3.8-flash"),
         gemini_fallback_models=tuple(
-            m.strip() for m in _env_str("GEMINI_FALLBACK_MODELS", "gemini-flash-lite-latest,gemini-2.5-flash").split(",") if m.strip()
+            m.strip() for m in _env_str("GEMINI_FALLBACK_MODELS", "gemini-3.6-flash,gemini-3.5-flash-lite,gemini-flash-lite-latest").split(",") if m.strip()
         ),
         groq_model=_env_str("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
+        openai_model=_env_str("OPENAI_MODEL", "gpt-6-luna"),
         hf_model=_env_str("HF_VLM_MODEL", "google/gemma-3-4b-it"),
         hf_provider=_env_str("HF_PROVIDER", "auto"),
         vlm_timeout_seconds=_env_float("VLM_TIMEOUT_SECONDS", 90.0),
@@ -116,13 +121,16 @@ def get_settings() -> Settings:
         # Gemini re-checks the spots (+1 call per single-photo analysis).
         vlm_second_opinion=_env_bool("VLM_SECOND_OPINION", True),
         vlm_fallback_order=tuple(
-            name.strip() for name in _env_str("VLM_FALLBACK_ORDER", "Gemini,Groq,Hugging Face").split(",") if name.strip()
+            name.strip() for name in _env_str("VLM_FALLBACK_ORDER", "Gemini,OpenAI,Groq,Hugging Face").split(",") if name.strip()
         ),
         max_upload_mb=max(1, _env_int("MAX_UPLOAD_MB", 10)),
         max_image_pixels=max(1, _env_int("MAX_IMAGE_PIXELS", 40_000_000)),
         max_request_body_mb=max(2, _env_int("MAX_REQUEST_BODY_MB", 32)),
         # In a public deployment, visitors should not be able to swap API keys.
-        allow_user_api_keys=_env_bool("ALLOW_USER_API_KEYS", True),
+        allow_user_api_keys=_env_bool("ALLOW_USER_API_KEYS", not _env_bool("PUBLIC_DEPLOYMENT", False)),
+        # "device": each browser sees only the profiles it created (sharing one link with friends);
+        # "shared": every profile is visible (a personal install). Public deployments default to "device".
+        profile_scope="device" if _env_str("PROFILE_SCOPE", "device" if _env_bool("PUBLIC_DEPLOYMENT", False) else "shared") == "device" else "shared",
         # Public mode is fail-closed: create_app refuses to start without an access token.
         public_deployment=_env_bool("PUBLIC_DEPLOYMENT", False),
         app_access_token=os.getenv("APP_ACCESS_TOKEN", "").strip(),
@@ -146,7 +154,7 @@ def configure_logging(level: str = "INFO") -> logging.Logger:
     return logger
 
 
-PROVIDER_ENV_ALIASES = {"Gemini": ["GOOGLE_API_KEY"], "Hugging Face": ["HUGGINGFACEHUB_API_TOKEN", "HUGGING_FACE_TOKEN"], "Groq": []}
+PROVIDER_ENV_ALIASES = {"Gemini": ["GOOGLE_API_KEY"], "Hugging Face": ["HUGGINGFACEHUB_API_TOKEN", "HUGGING_FACE_TOKEN"], "Groq": [], "OpenAI": []}
 
 
 def get_env_value(key: str, aliases: list[str] | None = None) -> str:

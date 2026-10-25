@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import dataclasses
 import os
 from io import BytesIO
@@ -54,9 +56,9 @@ def test_health_and_options_never_expose_keys(client):
     assert health["status"] == "ok" and health["ready"] is True
     assert set(health) == {"status", "version", "ready"}
     status = client.get("/api/status").json()
-    assert set(status["providers"]) == {"Gemini", "Hugging Face", "Groq"}
+    assert set(status["providers"]) == {"Gemini", "OpenAI", "Hugging Face", "Groq"}
     body = client.get("/api/health").text + client.get("/api/status").text + client.get("/api/options").text
-    for name in ("GEMINI_API_KEY", "GROQ_API_KEY", "HF_TOKEN"):
+    for name in ("GEMINI_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY", "HF_TOKEN"):
         value = os.getenv(name, "")
         if value:
             assert value not in body
@@ -287,7 +289,7 @@ def test_shelf_endpoints(client, profile):
 
 
 def test_weather_endpoint_uses_profile(client, profile, monkeypatch):
-    import weather
+    import services.weather as weather
 
     monkeypatch.setattr(weather, "_get", lambda url, params, trust_env: {
         "current": {"temperature_2m": 20, "relative_humidity_2m": 50, "uv_index": 4},
@@ -299,7 +301,7 @@ def test_weather_endpoint_uses_profile(client, profile, monkeypatch):
 
 
 def test_coach_endpoint(client, profile, monkeypatch):
-    import vlm_engine
+    import vlm.engine as vlm_engine
 
     seen = {}
 
@@ -317,3 +319,45 @@ def test_coach_endpoint(client, profile, monkeypatch):
     assert client.post("/api/coach", json={**body, "provider": "Evil"}).status_code == 422
     assert client.post("/api/coach", json={**body, "messages": [{"role": "assistant", "content": "x"}]}).status_code == 422
     assert client.get("/api/coach/suggestions").json()
+
+
+def test_device_scope_keeps_each_browsers_profiles_private(tmp_path):
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "devices.db", profile_scope="device", vlm_second_opinion=False)
+    with TestClient(create_app(settings, Container(settings))) as shared:
+        alice, bob = {"X-Device-Key": "a" * 40}, {"X-Device-Key": "b" * 40}
+        assert shared.get("/api/options").status_code == 200  # needs no device key
+        assert shared.get("/api/profiles").status_code == 400
+        mine = shared.post("/api/profiles", json=PROFILE, headers=alice).json()
+        shared.post(f"/api/profiles/{mine['id']}/events", json={"kind": "note", "note": "x"}, headers=alice)
+        assert [p["id"] for p in shared.get("/api/profiles", headers=alice).json()] == [mine["id"]]
+        assert shared.get("/api/profiles", headers=bob).json() == []
+        # Another device cannot read, change or delete it, nor its records and events.
+        for method, path in (("GET", f"/api/profiles/{mine['id']}"), ("GET", f"/api/profiles/{mine['id']}/history"),
+                             ("DELETE", f"/api/profiles/{mine['id']}"), ("GET", f"/api/profiles/{mine['id']}/journal")):
+            assert shared.request(method, path, headers=bob).status_code == 404, path
+        event = shared.get(f"/api/profiles/{mine['id']}/history", headers=alice).json()["events"][0]
+        assert shared.delete(f"/api/events/{event['id']}", headers=bob).status_code == 404
+        # The cookie works like the header (images and downloads cannot send headers).
+        shared.cookies.set("scv_device", "a" * 40)
+        assert shared.get(f"/api/profiles/{mine['id']}").status_code == 200
+        # Writes need the header: a cookie alone (as a cross-site request would carry) is not enough.
+        assert shared.delete(f"/api/events/{event['id']}").status_code == 400
+        assert shared.delete(f"/api/events/{event['id']}", headers=alice).status_code == 204
+
+
+def test_access_token_cookie_for_images_and_downloads(tmp_path):
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "cookie.db", app_access_token="secret-token")
+    with TestClient(create_app(settings, Container(settings))) as secured:
+        assert secured.get("/api/options").status_code == 401
+        secured.cookies.set("scv_token", "wrong")
+        assert secured.get("/api/options").status_code == 401
+        secured.cookies.set("scv_token", "secret-token")
+        assert secured.get("/api/options").status_code == 200
+
+
+def test_public_mode_allows_bring_your_own_key_when_enabled(tmp_path):
+    settings = dataclasses.replace(get_settings(), history_db_path=tmp_path / "byok.db", public_deployment=True,
+                                   app_access_token="x" * 40, allow_user_api_keys=True, profile_scope="device")
+    with TestClient(create_app(settings, Container(settings)), base_url="http://localhost") as public:
+        options = public.get("/api/options", headers={"Authorization": "Bearer " + "x" * 40}).json()
+        assert options["flags"]["allow_user_api_keys"] is True and options["flags"]["device_scoped"] is True

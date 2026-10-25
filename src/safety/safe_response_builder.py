@@ -1,4 +1,6 @@
-﻿from __future__ import annotations
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
+from __future__ import annotations
 
 import unicodedata
 from dataclasses import dataclass

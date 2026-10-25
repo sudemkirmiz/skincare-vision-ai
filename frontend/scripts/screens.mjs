@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 /**
  * Visual review helper: drives the app in headless Chromium and saves screenshots.
  * Needs a throwaway backend (API_TARGET) + `vite --port 5174`. Usage: node scripts/screens.mjs <step>

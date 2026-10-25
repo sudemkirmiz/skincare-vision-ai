@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -6,15 +8,16 @@ import { api } from '../lib/api'
 import { useAppState } from '../lib/app-state'
 import type { HistoryRecord } from '../lib/types'
 import { Button, Card, EmptyState, Notice, SectionHeader, Spinner } from '../components/ui'
+import { JourneyShare } from '../components/JourneyCard'
 import { ChangeMapView } from '../components/ChangeMapView'
 
 // Reference categorical palette, light mode, fixed order (validated for colour-vision deficiency).
 const SERIES = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4']
 const SCORE_KEYS = [['spots', 'Nokta yoğunluğu'], ['redness', 'Kızarıklık dengesi'], ['tone', 'Ton eşitliği'], ['texture', 'Doku pürüzsüzlüğü'], ['shine', 'Parlama kontrolü']] as const
-const GRID = '#e8eee8'
+const GRID = 'var(--color-line)'
 // Single-measure charts use the brand ink; the categorical palette is kept for the five sub-scores.
-const BRAND = '#3e8e47'
-const AXIS = { fontSize: 11, fill: '#68766d' }
+const BRAND = 'var(--color-brand-600)'
+const AXIS = { fontSize: 11, fill: 'var(--color-muted)' }
 // Manual dd.MM: locale data differs between browsers (some render 24/10 for tr-TR).
 const pad = (n: number) => String(n).padStart(2, '0')
 const day = (value: number | string) => { const d = new Date(value); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}` }
@@ -57,10 +60,10 @@ function Charts({ records, events }: { records: HistoryRecord[]; events: { id: s
     const row = data.find((item) => item.t >= start)
     return row ? [{ event, x: row.x }] : []
   }).map(({ event, x }) => (
-    <ReferenceLine key={event.id} x={x} stroke="#9aa8a0" strokeDasharray="4 4"
-      label={{ value: options.event_kinds[event.kind] ?? event.kind, position: 'insideTopLeft', fill: '#52514e', fontSize: 11 }} />
+    <ReferenceLine key={event.id} x={x} stroke="var(--color-muted)" strokeDasharray="4 4"
+      label={{ value: options.event_kinds[event.kind] ?? event.kind, position: 'insideTopLeft', fill: 'var(--color-ink-soft)', fontSize: 11 }} />
   ))
-  const tooltip = <Tooltip labelFormatter={(_, payload) => (payload?.[0]?.payload ? stamp(new Date(payload[0].payload.t).toISOString()) : '')} contentStyle={{ borderRadius: 14, border: '1px solid #ddebde', fontSize: 12 }} />
+  const tooltip = <Tooltip labelFormatter={(_, payload) => (payload?.[0]?.payload ? stamp(new Date(payload[0].payload.t).toISOString()) : '')} contentStyle={{ borderRadius: 14, border: '1px solid var(--color-line)', background: 'var(--color-surface)', color: 'var(--color-ink)', fontSize: 12 }} />
   return (
     <div className="space-y-5">
       <Card>
@@ -70,7 +73,7 @@ function Charts({ records, events }: { records: HistoryRecord[]; events: { id: s
             <LineChart data={data} margin={{ top: 16, right: 36, bottom: 0, left: -18 }}>
               <CartesianGrid vertical={false} stroke={GRID} />{xAxis}
               <YAxis domain={[0, 100]} tick={AXIS} axisLine={false} tickLine={false} />{tooltip}{markers}
-              <Line type="monotone" dataKey="overall" name="Genel skor" stroke={BRAND} strokeWidth={2.5} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="overall" name="Genel skor" stroke={BRAND} strokeWidth={2.5} dot={{ r: 4, strokeWidth: 2, fill: 'var(--color-surface)' }} activeDot={{ r: 6 }} isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -85,7 +88,7 @@ function Charts({ records, events }: { records: HistoryRecord[]; events: { id: s
               {/* itemSorter null keeps the validated colour order instead of sorting alphabetically. */}
               <Legend iconType="plainline" itemSorter={null} wrapperStyle={{ fontSize: 12 }} />
               {SCORE_KEYS.map(([key, label], index) => (
-                <Line key={key} type="monotone" dataKey={key} name={label} stroke={SERIES[index]} strokeWidth={2} dot={{ r: 3.5, strokeWidth: 2, fill: '#fff' }} connectNulls isAnimationActive={false} />
+                <Line key={key} type="monotone" dataKey={key} name={label} stroke={SERIES[index]} strokeWidth={2} dot={{ r: 3.5, strokeWidth: 2, fill: 'var(--color-surface)' }} connectNulls isAnimationActive={false} />
               ))}
             </LineChart>
           </ResponsiveContainer>
@@ -199,7 +202,10 @@ export function HistoryPage() {
     <div className="space-y-6">
       <div>
         <p className="eyebrow">Geçmiş ve Takip</p>
-        <h1 className="mt-3 text-[34px] leading-tight font-normal sm:text-[42px]">{profile.display_name}, cildiniz zaman içinde</h1>
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+          <h1 className="text-[34px] leading-tight font-normal sm:text-[42px]">{profile.display_name}, cildiniz zaman içinde</h1>
+          <JourneyShare records={records} />
+        </div>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">Kayıtlarınız bizde güvenle saklanır: sonuçlar ve küçük bir yüz önizlemesi. Yüklediğiniz orijinal fotoğraf saklanmaz; kayıtlarınızı dilediğiniz zaman silebilirsiniz.</p>
       </div>
       {history.isPending ? <Spinner label="Geçmiş yükleniyor…" /> : null}

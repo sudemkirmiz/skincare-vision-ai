@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import json
 from io import BytesIO
 from pathlib import Path
@@ -6,13 +8,13 @@ from unittest.mock import MagicMock
 import pytest
 from PIL import Image
 
-import vlm_engine
+import vlm.engine as vlm_engine
 from recommendation.catalog import Catalog, Product, load_catalog, recommend_products, search_links
 from recommendation.engine import build_routine
 from recommendation.inci import analyse_inci, evaluate_product, parse_inci
 from recommendation.profile import SkinProfile
 from safety.safe_response_builder import contains_blocked_term
-from vlm_engine import VLMEngine, VLMOptions, VLMProviderError
+from vlm.engine import VLMEngine, VLMOptions, VLMProviderError
 
 BHA_TONER = "Ingredients: Aqua, Salicylic Acid, Butylene Glycol, Niacinamide, Sodium Hydroxide, Parfum, Linalool."
 SUNSCREEN = "Aqua, Homosalate, Ethylhexyl Salicylate, Butyl Methoxydibenzoylmethane, Octocrylene, Glycerin, Alcohol Denat., Phenoxyethanol"

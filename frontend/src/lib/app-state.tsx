@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 /* oxlint-disable react/only-export-components -- provider and its access hook form one public module */
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
@@ -22,9 +24,11 @@ interface AppState {
   closeEditor: () => void
   ai: AiSettings
   setAi: (settings: Partial<AiSettings>) => void
-  /** Personal API keys live in memory only: never written to browser storage. */
+  /** Personal API keys live in memory unless the user opts in to keeping them on this device. */
   providerKeys: Record<string, string>
   setProviderKey: (provider: string, key: string) => void
+  rememberKeys: boolean
+  setRememberKeys: (remember: boolean) => void
   analysis: Analysis | null
   setAnalysis: (analysis: Analysis | null) => void
 }
@@ -32,6 +36,7 @@ interface AppState {
 const Context = createContext<AppState | null>(null)
 const ACTIVE_KEY = 'scv.activeProfile'
 const AI_KEY = 'scv.aiSettings'
+const KEYS_KEY = 'scv.providerKeys'
 
 // Browser storage is a convenience only; it can be blocked (private mode), so every access is guarded.
 function readStorage<T>(key: string, fallback: T): T {
@@ -73,8 +78,25 @@ export function AppStateProvider({ options, children }: { options: Options; chil
     }
   })
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
-  const [providerKeys, setProviderKeys] = useState<Record<string, string>>({})
-  const setProviderKey = useCallback((provider: string, key: string) => setProviderKeys((keys) => ({ ...keys, [provider]: key })), [])
+  // Opt-in only (handy on a personal phone): with it off, keys vanish when the tab closes.
+  const [rememberKeys, setRememberState] = useState(() => Object.keys(readStorage<Record<string, string>>(KEYS_KEY, {})).length > 0)
+  const [providerKeys, setProviderKeys] = useState<Record<string, string>>(() => readStorage<Record<string, string>>(KEYS_KEY, {}))
+  const setProviderKey = useCallback((provider: string, key: string) => setProviderKeys((keys) => {
+    const next = { ...keys, [provider]: key }
+    if (rememberKeys) writeStorage(KEYS_KEY, Object.fromEntries(Object.entries(next).filter(([, value]) => value.trim())))
+    return next
+  }), [rememberKeys])
+  const setRememberKeys = useCallback((remember: boolean) => {
+    setRememberState(remember)
+    if (remember) writeStorage(KEYS_KEY, Object.fromEntries(Object.entries(providerKeys).filter(([, value]) => value.trim())))
+    else {
+      try {
+        localStorage.removeItem(KEYS_KEY)
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [providerKeys])
 
   // Derived, not synced: falls back to the most recently used profile when the stored id is gone.
   const profile = profiles.find((p) => p.id === activeId) ?? profiles[0] ?? null
@@ -111,6 +133,8 @@ export function AppStateProvider({ options, children }: { options: Options; chil
     setAi,
     providerKeys,
     setProviderKey,
+    rememberKeys,
+    setRememberKeys,
     analysis,
     setAnalysis,
   }

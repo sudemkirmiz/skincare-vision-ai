@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Before/after comparison and trend series built from stored history records."""
 from __future__ import annotations
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Analysis orchestration, independent of the UI.
 
 The Streamlit app, the sample regression script and any future API all call
@@ -20,7 +22,9 @@ import numpy as np
 from PIL import Image, ImageOps
 
 from analysis.color_balance import apply_white_balance, estimate_white_balance
+from analysis.local_comment import build_local_comment
 from analysis.multiview import merge_views, primary_view_index
+from analysis.pipeline import run_pipeline
 from analysis.regions import REGION_NAMES, build_region_map, draw_region_overlay, summarize_regions
 from analysis.second_opinion import apply_to_metrics, parse_gemini_boxes, reconcile
 from analysis.skin_metrics import GEMINI_RING, compute_skin_metrics, draw_spot_candidates
@@ -28,18 +32,17 @@ from config import Settings
 from detection.face_detector import OpenCVFaceDetector
 from detection.face_landmarks import FaceLandmarkAnalyzer
 from detection.skin_finding_detector import SkinFindingDetector, draw_finding_boxes
-from imaging import read_image, write_image
-from main import run_pipeline
+from preprocessing.imaging import read_image, write_image
 from preprocessing.quality_checker import ImageQualityChecker
 from recommendation.engine import build_routine, routine_summary_for_vlm
 from recommendation.profile import SkinProfile
-from vlm_engine import VLMEngine, VLMOptions, VLMProviderError
-from vlm_quality import check_vlm_output, quality_score
-from vlm_router import ProviderTarget, VLMRouter, describe_fallback
+from vlm.engine import VLMEngine, VLMOptions, VLMProviderError
+from vlm.quality import check_vlm_output, quality_score
+from vlm.router import ProviderTarget, VLMRouter, describe_fallback
 
 logger = logging.getLogger("skincare.service")
 
-PROVIDER_ENV_KEYS = {"Gemini": "GEMINI_API_KEY", "Hugging Face": "HF_TOKEN", "Groq": "GROQ_API_KEY"}
+PROVIDER_ENV_KEYS = {"Gemini": "GEMINI_API_KEY", "OpenAI": "OPENAI_API_KEY", "Hugging Face": "HF_TOKEN", "Groq": "GROQ_API_KEY"}
 PREVIEW_MAX_SIDE = 1000
 THUMBNAIL_MAX_SIDE = 320
 NOTICEABLE_CAST = 0.08  # channel gain deviation worth telling the user about  # stored in history; small on purpose
@@ -92,6 +95,7 @@ class AnalysisService:
             gemini_model=settings.gemini_model,
             gemini_fallback_models=settings.gemini_fallback_models,
             groq_model=settings.groq_model,
+            openai_model=settings.openai_model,
             timeout_seconds=settings.vlm_timeout_seconds,
             max_retries=settings.vlm_max_retries,
             trust_env_proxy=settings.vlm_trust_env_proxy,
@@ -114,6 +118,7 @@ class AnalysisService:
         personalization: dict[str, str] | None = None,
         merged: dict[str, Any] | None = None,
         second_opinion: bool = False,
+        previous: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run the whole pipeline in a private temp dir so concurrent sessions never share files.
 
@@ -180,6 +185,14 @@ class AnalysisService:
                 result["visible_observations"] = vlm_output["visible_observations"]
                 result["care_suggestions"] = vlm_output["care_suggestions"]
                 result["disclaimer"] = vlm_output["disclaimer"]
+            comment_source = "ai" if vlm_output else None
+            if not vlm_output and face_found:
+                # No key, comment turned off or every provider failed: still explain the numbers, without AI.
+                local = build_local_comment(skin_metrics, region_summary, routine, personalization, result.get("image_quality"),
+                                            concerns=profile.concerns if profile else None, previous=previous)
+                if local:
+                    result.update(local)
+                    comment_source = "local"
 
             original_uri = image_to_data_uri(upload_path)
             marked_source = annotated_path if annotated_path.exists() else face_crop_path
@@ -198,6 +211,7 @@ class AnalysisService:
             "skin_findings": skin_findings_data,
             "vlm_output": vlm_output,
             "vlm_error": vlm_error,
+            "comment_source": comment_source,
             "vlm_attempts": vlm_attempts,
             "vlm_note": describe_fallback(vlm_attempts, vlm_output["provider"]) if vlm_output and not vlm_output.get("cached") else None,
             "face_found": face_found,

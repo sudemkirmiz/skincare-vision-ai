@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """INCI (ingredient list) parsing and compatibility checks against a skin profile and routine.
 
 Matching is substring-based on normalised INCI names, which is robust to the small

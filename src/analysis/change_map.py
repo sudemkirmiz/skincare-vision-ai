@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Aligned before/after change map from two saved face thumbnails.
 
 The later face is warped onto the earlier one with a similarity transform fitted on rigid landmarks

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery } from '@tanstack/react-query'
 /* oxlint-disable react/only-export-components -- persisted-location parsing is tested with this component */
 import clsx from 'clsx'

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import type { ReactNode } from 'react'
 /* oxlint-disable react/only-export-components -- result components share the tested totalSpots helper */
 import { Alert, CheckCircle, FaceScan, Info, Lightbulb, Sparkles } from '../icons'
@@ -99,13 +101,21 @@ export function AiComment({ analysis }: { analysis: Analysis }) {
   const { visible_observations: observations, care_suggestions: suggestions } = analysis.result
   // Turning the comment off is a choice, not an error: show it as neutral information.
   const disabledByUser = analysis.vlm_error?.includes('ayarlarda kapalı') ?? false
+  const local = analysis.comment_source === 'local'
   return (
     <Card>
-      <SectionHeader icon={<Sparkles />} title="Bakım odaklı yorum" subtitle={analysis.vlm_output ? `Kaynak: ${analysis.vlm_output.provider} · ${analysis.vlm_output.model}` : undefined} />
+      <SectionHeader icon={<Sparkles />} title="Bakım odaklı yorum" subtitle={analysis.vlm_output ? `Kaynak: ${analysis.vlm_output.provider} · ${analysis.vlm_output.model}` : local ? 'Kaynak: yerel kural motoru · ölçümlerinizden, yapay zekâ kullanmadan' : undefined} />
       <div className="space-y-3">
         {analysis.vlm_note ? <Notice>{analysis.vlm_note}</Notice> : null}
         {analysis.vlm_output?.cached ? <Notice>Bu fotoğraf için az önce üretilen yorum tekrar kullanıldı (kota tasarrufu).</Notice> : null}
-        {analysis.vlm_error && disabledByUser ? (
+        {local && analysis.vlm_error && !disabledByUser && !analysis.vlm_error.includes('tanımlı değil') ? (
+          <Notice tone="warn" icon={<Alert size={18} />}>{`Yapay zekâ yorumu alınamadı; yerine ölçümlerinizden kural tabanlı yorum gösteriliyor.
+${analysis.vlm_error}`}</Notice>
+        ) : local ? (
+          <Notice>{disabledByUser
+            ? 'Yapay zekâ yorumu kapalı; aşağıdaki yorum ölçümlerinizden kural tabanlı hazırlandı. Daha ayrıntılı yorum için ayarlardan açabilirsiniz.'
+            : 'Yapay zekâ kullanılmadan, ölçümlerinizden kural tabanlı hazırlandı. Daha ayrıntılı ve doğal bir yorum için ayarlardan bir API anahtarı ekleyebilirsiniz.'}</Notice>
+        ) : analysis.vlm_error && disabledByUser ? (
           <Notice>Yapay zekâ yorumu ayarlarda kapalı. Açmak için üst menüdeki ayarlar düğmesini kullanın; cilt skoru ve rutininiz yine hesaplandı.</Notice>
         ) : analysis.vlm_error ? (
           <Notice tone="warn" icon={<Alert size={18} />}>{`Yapay zekâ yorumu üretilemedi.\n${analysis.vlm_error}`}</Notice>

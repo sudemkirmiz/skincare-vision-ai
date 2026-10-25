@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Human-readable, portable download file names (e.g. Cilt_Raporu_Ayse_Yilmaz_24-10-2026.pdf).
 
 Turkish letters are transliterated: some mail clients, older Windows tools and zip

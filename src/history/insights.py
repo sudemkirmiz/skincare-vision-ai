@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Personal patterns from the daily journal: adherence, streaks and possible triggers.
 
 Every insight compares the user's own days with and without something, needs a minimum number of
@@ -58,6 +60,41 @@ def streak(entries: list[dict[str, Any]], today: date) -> int:
         count += 1
         current -= timedelta(days=1)
     return count
+
+
+STREAK_MILESTONES = (3, 7, 14, 30, 60, 100)
+
+
+def _routine_days(entries: list[dict[str, Any]]) -> set[date]:
+    return {_day(entry["date"]) for entry in entries if entry["am_done"] or entry["pm_done"]}
+
+
+def routine_streak(entries: list[dict[str, Any]], today: date) -> dict[str, Any]:
+    """Days in a row with at least one routine done; today may still be open, so yesterday keeps the streak alive."""
+    days = _routine_days(entries)
+    current = today if today in days else today - timedelta(days=1)
+    count = 0
+    while current in days:
+        count += 1
+        current -= timedelta(days=1)
+    best = run = 0
+    previous: date | None = None
+    for day in sorted(days):
+        run = run + 1 if previous and day - previous == timedelta(days=1) else 1
+        best, previous = max(best, run), day
+    by_day = {_day(entry["date"]): entry for entry in entries}
+    week = []
+    for offset in range(6, -1, -1):
+        entry = by_day.get(today - timedelta(days=offset), {})
+        week.append({"date": (today - timedelta(days=offset)).isoformat(), "am": entry.get("am_done") is True, "pm": entry.get("pm_done") is True})
+    return {
+        "current": count,
+        "best": best,
+        "today_done": today in days,
+        "reached": max((step for step in STREAK_MILESTONES if count >= step), default=0),
+        "next": next((step for step in STREAK_MILESTONES if step > count), None),
+        "week": week,
+    }
 
 
 def adherence(entries: list[dict[str, Any]], today: date, days: int = ADHERENCE_DAYS) -> dict[str, Any]:
@@ -198,6 +235,7 @@ def build_insights(entries: list[dict[str, Any]], records: list[Any], today: dat
     summary = {
         "streak": streak(entries, today),
         "adherence": adherence(entries, today),
+        "routine": routine_streak(entries, today),
         "feel": _feel_trend(entries, today),
         "logged_days": logged,
         "needed_days": max(0, MIN_DAYS_FOR_INSIGHTS - logged),

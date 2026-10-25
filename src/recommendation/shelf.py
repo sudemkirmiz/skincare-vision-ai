@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """The user's product shelf: per-product verdicts, opened-product expiry and shelf-wide checks.
 
 Each product is judged with the same INCI checker as the Product Checker. On top of that the shelf
@@ -12,6 +14,7 @@ from typing import Any
 from recommendation.inci import active_name, analyse_inci, evaluate_product, parse_inci
 from recommendation.ingredients import INGREDIENTS
 from recommendation.profile import SkinProfile
+from recommendation.shelf_plan import plan_shelf
 
 CATEGORIES = {
     "cleanser": "Temizleyici",
@@ -70,7 +73,7 @@ def _conflicts(items: list[dict[str, Any]]) -> list[str]:
             if active_b in INGREDIENTS[active_a].conflicts or active_a in INGREDIENTS[active_b].conflicts:
                 seen.add(pair)
                 warnings.append(f"“{first['name']}” ({active_name(active_a)}) ile “{second['name']}” ({active_name(active_b)}) "
-                                "aynı akşam kullanılmamalı; farklı akşamlara ayırın.")
+                                "aynı akşam kullanılmamalı; aşağıdaki “Raf rutinim” planı bunları farklı akşamlara ayırır.")
     return warnings
 
 
@@ -123,6 +126,7 @@ def analyse_shelf(items: list[dict[str, Any]], profile: SkinProfile, routine: di
         "conflicts": _conflicts(analysed) + _duplicates(analysed),
         "gaps": _gaps(analysed, routine),
         "notes": notes,
+        "plan": plan_shelf(analysed, profile),
         "categories": CATEGORIES,
         "usages": USAGES,
     }

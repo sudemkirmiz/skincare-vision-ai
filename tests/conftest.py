@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from __future__ import annotations
 
 import sys
@@ -14,8 +16,8 @@ import pytest  # noqa: E402
 @pytest.fixture(autouse=True)
 def _fresh_gemini_model_health(monkeypatch):
     """Model cooldowns are process-wide by design; tests must not leak them into each other."""
-    import vlm_engine
-    from health import ProviderHealth
+    import vlm.engine as vlm_engine
+    from vlm.health import ProviderHealth
 
     monkeypatch.setattr(vlm_engine, "GEMINI_MODEL_HEALTH", ProviderHealth())
 
@@ -37,6 +39,6 @@ class _NoNetworkSession:
 
 @pytest.fixture(autouse=True)
 def _block_network(monkeypatch):
-    import vlm_engine
+    import vlm.engine as vlm_engine
 
     monkeypatch.setattr(vlm_engine.requests, "Session", _NoNetworkSession)

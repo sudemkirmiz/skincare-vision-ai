@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import sqlite3
 
 import pytest
@@ -6,7 +8,7 @@ from history.store import MIGRATIONS, HistoryStore, record_from_payload
 from recommendation.engine import build_routine
 from recommendation.profile import SkinProfile
 from users.profile import UserProfile, clean_name, completeness, infer_skin_type, profile_photo_mismatches, validate_required
-from vlm_quality import check_vlm_output
+from vlm.quality import check_vlm_output
 
 
 def test_clean_name_keeps_turkish_letters_and_strips_noise():

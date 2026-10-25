@@ -1,8 +1,10 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import numpy as np
 import pytest
 from PIL import Image
 
-from imaging import validate_image_bytes
+from preprocessing.imaging import validate_image_bytes
 from preprocessing.quality_checker import ImageQualityChecker
 
 

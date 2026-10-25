@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({

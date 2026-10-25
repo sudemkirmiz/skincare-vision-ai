@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { Meter, StatusBadge, scoreStatus } from './ui'

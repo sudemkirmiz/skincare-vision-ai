@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Two-page A4 PDF report built with ReportLab (pure Python, embeds Poppins for Turkish text).
 
 Page 1: who/when, photos, Skin Score with sub-scores, regional distribution, notes.
@@ -29,6 +31,7 @@ from reportlab.platypus import Image, KeepTogether, PageBreak, Paragraph, Simple
 from recommendation.profile import CONCERNS, SENSITIVITY, SKIN_TYPES
 
 FONT_DIR = Path(__file__).resolve().parents[2] / "assets" / "fonts"
+LOGO = Path(__file__).resolve().parents[2] / "assets" / "brand" / "logo.png"
 INK = colors.HexColor("#24342B")
 MUTED = colors.HexColor("#68766D")
 LINE = colors.HexColor("#DDEBDE")
@@ -139,7 +142,13 @@ def _grid_style(header: bool = True) -> TableStyle:
 def _header(story: list, styles: dict, payload: dict, profile: Any | None) -> None:
     created = payload.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M")
     name = profile.full_name if profile is not None else ""
-    story.append(Paragraph(_text("SkinCare Vision AI · Bakım Ön Değerlendirme Raporu"), styles["muted"]))
+    caption = Paragraph(_text("SkinCare Vision AI · Bakım Ön Değerlendirme Raporu"), styles["muted"])
+    if LOGO.exists():
+        brand = Table([[Image(str(LOGO), width=9 * mm, height=9 * mm), caption]], colWidths=[11 * mm, None])
+        brand.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]))
+        story.append(brand)
+    else:
+        story.append(caption)
     story.append(Paragraph(_text(name or "Cilt Analizi"), styles["title"]))
     details = [f"Tarih: {created}"]
     if profile is not None:
@@ -292,6 +301,7 @@ def _footer(disclaimer: str):
             text.textLine(line)
         canvas.drawText(text)
         canvas.drawRightString(PAGE_WIDTH - MARGIN, 10.5 * mm, f"Sayfa {document.page}")
+        canvas.drawRightString(PAGE_WIDTH - MARGIN, 7.5 * mm, "© 2026 Sudem Kırmız · SkinCare Vision AI")
         canvas.restoreState()
     return draw
 

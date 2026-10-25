@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from safety.safe_response_builder import DISCLAIMER, FALLBACK_ITEM, SafeResponseBuilder, contains_blocked_term
 
 

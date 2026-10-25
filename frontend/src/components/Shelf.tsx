@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useState, type ReactNode } from 'react'
@@ -6,6 +8,7 @@ import { ApiError, api } from '../lib/api'
 import { useAppState } from '../lib/app-state'
 import type { ShelfItem, ShelfItemInput, ShelfResponse } from '../lib/types'
 import { Button, Card, EmptyState, Notice, Spinner } from './ui'
+import { ShelfPlanCard } from './ShelfPlan'
 
 const CATEGORY_ICON: Record<string, ReactNode> = {
   cleanser: <Cleanser size={22} />, moisturizer: <Jar size={22} />, sunscreen: <ShieldSun size={22} />,
@@ -148,7 +151,8 @@ export function ShelfPanel({ prefill, onPrefillUsed }: { prefill: ShelfItemInput
               onEdit={() => setEditing({ id: item.id, initial: { name: item.name, category: item.category, usage: item.usage, inci: item.inci, opened_at: item.opened_at, pao_months: item.pao_months } })} />
           ))}
         </div>
-      ) : !form ? (
+      ) : null}
+      {data.items.length ? <ShelfPlanCard plan={data.plan} /> : !form ? (
         <EmptyState icon={<Jar size={28} />} title="Elinizdeki ürünleri ekleyin">Temizleyici, nemlendirici, güneş kremi ve serumlarınızı ekleyin; aynı akşam kullanılmaması gerekenleri, eksik adımları ve son kullanma sürelerini birlikte takip edelim.</EmptyState>
       ) : null}
     </div>

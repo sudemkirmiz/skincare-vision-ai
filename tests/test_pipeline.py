@@ -1,10 +1,12 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from imaging import read_image, write_image
-from main import run_pipeline
+from analysis.pipeline import run_pipeline
+from preprocessing.imaging import read_image, write_image
 
 MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "acne_like_spot.pt"
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Small process-local fixed-window limiter for expensive unauthenticated API work."""
 from __future__ import annotations
 
@@ -11,6 +13,15 @@ class RateLimiter:
         self._clock = clock
         self._lock = threading.Lock()
         self._buckets: dict[tuple[str, str], tuple[float, int]] = {}
+
+    def blocked(self, subject: str, action: str, limit: int) -> int:
+        """Seconds until `subject` may try `action` again (0 = allowed), without using up an attempt."""
+        now = self._clock()
+        with self._lock:
+            started, used = self._buckets.get((subject, action), (now, 0))
+            if now - started >= self.window_seconds or used < limit:
+                return 0
+            return max(1, int(self.window_seconds - (now - started)))
 
     def take(self, subject: str, action: str, limit: int) -> tuple[bool, int]:
         now = self._clock()

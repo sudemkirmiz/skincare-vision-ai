@@ -50,7 +50,7 @@ COPY --chown=appuser:appuser src/ ./src/
 COPY --chown=appuser:appuser data/products.json data/products.example.json ./data/
 COPY --chown=appuser:appuser models/ ./models/
 COPY --chown=appuser:appuser assets/ ./assets/
-COPY --chown=appuser:appuser LICENSE THIRD_PARTY_NOTICES.md ./
+COPY --chown=appuser:appuser LICENSE NOTICE TRADEMARKS.md THIRD_PARTY_NOTICES.md ./
 COPY --chown=appuser:appuser licenses/ ./licenses/
 COPY --from=web --chown=appuser:appuser /web/dist ./frontend/dist
 

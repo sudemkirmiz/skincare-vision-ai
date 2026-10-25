@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useState, type ReactNode } from 'react'
-import { ArrowLeft, CheckCircle, Info, LogoMark, ShieldSun, Sparkles, UserCircle } from '../icons'
+import { ArrowLeft, BrandLogo, CheckCircle, Info, ShieldSun, Sparkles, UserCircle } from '../icons'
 import { ApiError, api } from '../lib/api'
 import { useAppState } from '../lib/app-state'
 import type { Dict, Profile, ProfileInput } from '../lib/types'
@@ -131,11 +133,7 @@ export function Onboarding({ mode }: { mode: 'first' | 'edit' | 'new' }) {
 
   return (
     <div className="mx-auto max-w-3xl pt-8 pb-16 sm:pt-12">
-      <div className="mb-10 flex items-center gap-2.5">
-        <LogoMark size={28} className="text-brand-700" />
-        <span className="font-display text-[19px] tracking-tight">SkinCare Vision</span>
-        <span className="text-[9px] font-semibold tracking-[0.18em] text-brand-600">AI</span>
-      </div>
+      <div className="mb-10"><BrandLogo /></div>
       <div className="mb-8">
         <div className="mb-5 flex max-w-xs gap-1.5" aria-hidden>
           {[1, 2].map((index) => <span key={index} className={clsx('h-1 flex-1 rounded-full', index <= step ? 'bg-brand-500' : 'bg-line')} />)}

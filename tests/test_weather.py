@@ -1,8 +1,10 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import pytest
 
-import weather
+import services.weather as weather
 from recommendation.profile import SkinProfile
-from weather import WeatherError, WeatherService, round_coords, skin_tips, uv_band
+from services.weather import WeatherError, WeatherService, round_coords, skin_tips, uv_band
 
 FORECAST = {
     "current": {"temperature_2m": 27.5, "relative_humidity_2m": 78, "uv_index": 5.1, "time": "2026-10-25T12:00"},

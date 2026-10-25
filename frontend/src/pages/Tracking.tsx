@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useState } from 'react'
@@ -7,12 +9,13 @@ import { useAppState } from '../lib/app-state'
 import type { Insight, JournalEntry, JournalResponse } from '../lib/types'
 import { Button, Card, Notice, Progress, SectionHeader, Spinner } from '../components/ui'
 import { WeatherCard } from '../components/WeatherCard'
+import { TodayCard } from '../components/TodayCard'
 
 const EDIT_DAYS = 7
 const CALENDAR_DAYS = 28
 const WEEKDAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
 // Skin feel 1-5 on a light status scale; the number is always printed too, so colour is never the only signal.
-const FEEL_BG: Record<number, string> = { 1: 'bg-[#f6d5d3]', 2: 'bg-[#fbe0d3]', 3: 'bg-[#f7ebc6]', 4: 'bg-[#d9efd6]', 5: 'bg-[#b9e3b4]' }
+const FEEL_BG: Record<number, string> = { 1: 'bg-feel-1', 2: 'bg-feel-2', 3: 'bg-feel-3', 4: 'bg-feel-4', 5: 'bg-feel-5' }
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
@@ -56,7 +59,7 @@ function DoneToggle({ icon, label, value, onChange }: { icon: React.ReactNode; l
         {([[true, 'Yaptım'], [false, 'Atladım']] as const).map(([option, text]) => (
           <button key={text} type="button" aria-pressed={value === option} onClick={() => onChange(value === option ? null : option)}
             className={clsx('rounded-lg border px-2 py-1.5 text-sm transition', value === option
-              ? option ? 'border-brand-500 bg-brand-500 text-white' : 'border-ink/60 bg-ink/80 text-white'
+              ? option ? 'border-brand-500 bg-brand-500 text-white' : 'border-ink/60 bg-ink/80 text-canvas'
               : 'border-line-strong bg-surface hover:border-brand-400')}>
             {text}
           </button>
@@ -95,7 +98,7 @@ function CheckIn({ data, day, setDay }: { data: JournalResponse; day: string; se
           const logged = data.entries.some((entry) => entry.date === date)
           return (
             <button key={date} type="button" role="tab" aria-selected={date === day} onClick={() => setDay(date)}
-              className={clsx('flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition', date === day ? 'border-ink bg-ink text-white' : 'border-line-strong bg-surface hover:border-ink/40')}>
+              className={clsx('flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition', date === day ? 'border-ink bg-ink text-canvas' : 'border-line-strong bg-surface hover:border-ink/40')}>
               {logged ? <CheckCircle size={14} className={date === day ? 'text-brand-300' : 'text-brand-600'} /> : null}{dayLabel(date)}
             </button>
           )
@@ -155,7 +158,7 @@ function CheckIn({ data, day, setDay }: { data: JournalResponse; day: string; se
 function Stats({ data }: { data: JournalResponse }) {
   const { streak, adherence, feel } = data.summary
   const tiles: [string, string, string][] = [
-    ['Seri', `${streak}`, streak === 1 ? 'gün' : 'gün üst üste'],
+    ['Kayıt serisi', `${streak}`, streak === 1 ? 'gün' : 'gün üst üste kayıt'],
     ['Sabah rutini', adherence.am_done === null ? '–' : `%${adherence.am_done}`, `son ${adherence.days} günde`],
     ['Akşam rutini', adherence.pm_done === null ? '–' : `%${adherence.pm_done}`, `son ${adherence.days} günde`],
     ['Cilt hissi', feel ? `${feel.this_week}` : '–', feel?.change ? `geçen haftaya göre ${feel.change > 0 ? '+' : ''}${feel.change}` : 'bu hafta, 5 üzerinden'],
@@ -267,6 +270,7 @@ export function TrackingPage() {
         <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
           <CheckIn key={day} data={journal.data} day={day} setDay={setDay} />
           <div className="space-y-6">
+            <TodayCard quickTick={false} />
             <Stats data={journal.data} />
             <WeatherCard />
             <MonthGrid data={journal.data} day={day} setDay={setDay} />

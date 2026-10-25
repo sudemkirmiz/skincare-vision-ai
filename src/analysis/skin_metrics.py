@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Explainable, model-free skin appearance metrics.
 
 Everything here is classical image processing on a scale-normalised face crop, so it

@@ -1,13 +1,15 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from unittest.mock import MagicMock
 
 import pytest
 import requests
 from PIL import Image
 
-import vlm_engine
-from vlm_engine import VLMEngine, VLMOptions, VLMProviderError, normalize_vlm_json
-from vlm_quality import check_vlm_output, quality_score
-from vlm_router import ProviderHealth, ProviderTarget, ResponseCache, VLMRouter, describe_fallback
+import vlm.engine as vlm_engine
+from vlm.engine import VLMEngine, VLMOptions, VLMProviderError, normalize_vlm_json
+from vlm.quality import check_vlm_output, quality_score
+from vlm.router import ProviderHealth, ProviderTarget, ResponseCache, VLMRouter, describe_fallback
 
 
 class FakeClock:

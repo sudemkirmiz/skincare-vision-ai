@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
@@ -136,7 +138,7 @@ export function CoachLauncher() {
     <>
       {!open ? (
         <button type="button" onClick={() => setOpen(true)} aria-label="Cilt koçunu aç"
-          className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 px-4 py-3 text-sm font-medium text-white shadow-[0_12px_30px_rgb(76_175_80/0.35)] transition hover:shadow-[0_16px_36px_rgb(76_175_80/0.45)] sm:right-6 sm:bottom-6">
+          className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 px-4 dark:from-[#4caf50] dark:to-[#2e7d32] py-3 text-sm font-medium text-white shadow-[0_12px_30px_rgb(76_175_80/0.35)] transition hover:shadow-[0_16px_36px_rgb(76_175_80/0.45)] sm:right-6 sm:bottom-6">
           <Sparkles size={18} /> Cilt koçu
         </button>
       ) : null}

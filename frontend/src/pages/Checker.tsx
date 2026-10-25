@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { Alert, CheckCircle, ImageUpload, Info, LabelScan, Leaf, Plus, Sparkles, StatusGood, StatusPriority, StatusWatch } from '../icons'
@@ -6,6 +8,7 @@ import { useAppState } from '../lib/app-state'
 import type { ProductVerdict, ShelfItemInput } from '../lib/types'
 import { ShelfPanel } from '../components/Shelf'
 import { Button, Card, Notice, SectionHeader, Tabs } from '../components/ui'
+import { DEMO, SAMPLE_INCI } from '../lib/demo'
 
 const VERDICT = {
   suitable: { Icon: StatusGood, color: 'text-good' },
@@ -54,7 +57,7 @@ function VerdictCard({ verdict, productName, onAdd }: { verdict: ProductVerdict;
 
 function ProductCheck({ onAddToShelf }: { onAddToShelf?: (item: ShelfItemInput) => void }) {
   const { profile, ai, analysis, providerKeys } = useAppState()
-  const [mode, setMode] = useState<'photo' | 'text'>('photo')
+  const [mode, setMode] = useState<'photo' | 'text'>(DEMO ? 'text' : 'photo')
   const [text, setText] = useState('')
   const [productName, setProductName] = useState('')
   const [label, setLabel] = useState<File | null>(null)
@@ -95,6 +98,7 @@ function ProductCheck({ onAddToShelf }: { onAddToShelf?: (item: ShelfItemInput) 
           </div>
         ) : (
           <div className="space-y-4">
+            {DEMO ? <button type="button" className="text-sm font-medium text-brand-700 underline-offset-2 hover:underline" onClick={() => setText(SAMPLE_INCI)}>Demo için örnek içerik listesini ekle</button> : null}
             <textarea className="field min-h-36" value={text} onChange={(event) => setText(event.target.value)} placeholder="Aqua, Glycerin, Niacinamide, …" aria-label="İçerik listesi (INCI)" />
             <Button className="w-full" disabled={!text.trim() || check.isPending} onClick={() => check.mutate(text)}>{check.isPending ? 'Kontrol ediliyor…' : 'Kontrol et'}</Button>
           </div>

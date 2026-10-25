@@ -1,13 +1,17 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, Close, DocumentPdf, FaceScan, ImageUpload, Plus, ShieldSun, Sparkles, Sun } from '../icons'
 import { ApiError, api } from '../lib/api'
 import { useAppState } from '../lib/app-state'
+import { DEMO, asset } from '../lib/demo'
 import { AiComment, MismatchHints, PhotosCard, QualityCard, RegionCard, ResultHero, ScoreDetails, TechnicalDetails } from '../components/results'
 import { ProductsPanel, ReportPanel, RoutinePanel } from '../components/plan'
 import { CameraCapture, cameraSupported } from '../components/CameraCapture'
 import { WeatherCard } from '../components/WeatherCard'
+import { TodayCard } from '../components/TodayCard'
 import { Button, EmptyState, Notice, Tabs } from '../components/ui'
 
 type Tab = 'summary' | 'detail' | 'routine' | 'report'
@@ -83,7 +87,7 @@ function UploadCard({ files, setFiles, onAnalyze, busy }: { files: File[]; setFi
             <div key={url} className="relative">
               <img src={url} alt={`Fotoğraf ${index + 1}`} className="aspect-[3/4] w-full rounded-lg border border-line object-cover" />
               <button type="button" aria-label="Fotoğrafı kaldır" onClick={() => setFiles(files.filter((_, i) => i !== index))}
-                className="absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-full bg-white/95 text-ink shadow-sm hover:bg-white"><Close size={14} /></button>
+                className="absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-full bg-white/95 text-[#24342b] shadow-sm hover:bg-white"><Close size={14} /></button>
             </div>
           ))}
         </div>
@@ -93,6 +97,26 @@ function UploadCard({ files, setFiles, onAnalyze, busy }: { files: File[]; setFi
       <Button className="mt-5 w-full py-3" onClick={onAnalyze} disabled={!files.length || busy}>
         {busy ? 'Analiz ediliyor…' : <><FaceScan size={18} /> Analizi başlat</>}
       </Button>
+      <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-line pt-5">
+        {TIPS.map((tip) => <li key={tip.text} className="flex items-center gap-2 text-xs text-ink-soft"><span className="text-brand-600">{tip.icon}</span>{tip.text}</li>)}
+      </ul>
+    </div>
+  )
+}
+
+/** Demo build: the recorded sample photo is the only one that can be analysed, so say so instead of taking uploads. */
+function DemoUpload({ onAnalyze }: { onAnalyze: () => void }) {
+  return (
+    <div className="card p-5 sm:p-6">
+      <div className="flex gap-4">
+        <img src={asset('demo/sample.jpg')} alt="Örnek fotoğraf (yapay zekâ ile üretilmiş portre)" className="aspect-[3/4] w-28 shrink-0 rounded-xl border border-line object-cover" />
+        <div>
+          <p className="eyebrow">Canlı demo</p>
+          <p className="mt-2 font-medium">Örnek fotoğrafla deneyin</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted">Demoda kendi fotoğrafınız yüklenmez; analiz, gerçek modellerle önceden işlenmiş bu örnek portre üzerinden gösterilir.</p>
+        </div>
+      </div>
+      <Button className="mt-5 w-full py-3" onClick={onAnalyze}><FaceScan size={18} /> Örnek fotoğrafı analiz et</Button>
       <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-line pt-5">
         {TIPS.map((tip) => <li key={tip.text} className="flex items-center gap-2 text-xs text-ink-soft"><span className="text-brand-600">{tip.icon}</span>{tip.text}</li>)}
       </ul>
@@ -125,7 +149,7 @@ function Analyzing() {
 }
 
 function Welcome({ children }: { children: React.ReactNode }) {
-  const { profile } = useAppState()
+  const { profile, options } = useAppState()
   return (
     <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-start lg:gap-16">
       <div className="pt-2">
@@ -152,7 +176,7 @@ function Welcome({ children }: { children: React.ReactNode }) {
           Fotoğrafınız analizden sonra saklanmaz. Bu bir tıbbi teşhis değildir; ağrı, hızlı değişim veya endişe varsa dermatoloğa danışın.
         </p>
       </div>
-      <div className="space-y-6">{children}<WeatherCard /></div>
+      <div className="space-y-6">{children}{options.flags.history_enabled ? <TodayCard /> : null}<WeatherCard /></div>
     </div>
   )
 }
@@ -178,7 +202,7 @@ export function AnalyzePage() {
   if (run.isPending || !current) {
     return (
       <Welcome>
-        {run.isPending ? <Analyzing /> : <UploadCard files={files} setFiles={setFiles} onAnalyze={() => run.mutate()} busy={false} />}
+        {run.isPending ? <Analyzing /> : DEMO ? <DemoUpload onAnalyze={() => run.mutate()} /> : <UploadCard files={files} setFiles={setFiles} onAnalyze={() => run.mutate()} busy={false} />}
         {run.isError ? <div className="mt-4"><Notice tone="error">{run.error instanceof ApiError ? run.error.messages.join('\n') : 'Analiz çalıştırılamadı; lütfen tekrar deneyin.'}</Notice></div> : null}
       </Welcome>
     )

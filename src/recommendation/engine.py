@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Rule-based routine engine: analysis metrics + skin profile -> explained AM/PM routine.
 
 Deterministic on purpose: every suggestion can be traced to a metric or an answer,

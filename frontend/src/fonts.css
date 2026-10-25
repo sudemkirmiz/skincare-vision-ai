@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (C) 2026 Sudem Kırmız */
 /* Only latin + latin-ext (Turkish needs latin-ext); the packages also ship Cyrillic, Greek and Vietnamese. */
 @font-face {
   font-family: 'Inter Variable';

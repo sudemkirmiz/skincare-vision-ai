@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { ChevronRight, StatusGood, StatusPriority } from '../icons'
@@ -19,7 +21,7 @@ function WipeSlider({ before, after }: { before: string; after: string }) {
       <img src={after} alt="Sonra (hizalanmış)" className="absolute inset-0 h-full w-full object-cover" />
       <img src={before} alt="Önce" className="absolute inset-0 h-full w-full object-cover" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }} />
       <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-white shadow-[0_0_0_1px_rgb(0_0_0/0.15)]" style={{ left: `${position}%` }}>
-        <span className="absolute top-1/2 left-1/2 flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-ink shadow"><ChevronRight size={12} className="rotate-180" /><ChevronRight size={12} /></span>
+        <span className="absolute top-1/2 left-1/2 flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#24342b] shadow"><ChevronRight size={12} className="rotate-180" /><ChevronRight size={12} /></span>
       </div>
       <span className="absolute top-3 left-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white">Önce</span>
       <span className="absolute top-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white">Sonra</span>

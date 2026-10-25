@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Plain-text and JSON exports of an analysis (shared by the Streamlit app and the API)."""
 from __future__ import annotations
 

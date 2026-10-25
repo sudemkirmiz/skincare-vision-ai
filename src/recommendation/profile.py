@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """User skin profile collected by the questionnaire.
 
 Pregnancy and allergy answers are health data: they only filter the routine locally,

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Long-lived services for the API process (models load once, shared by all requests)."""
 from __future__ import annotations
 
@@ -16,7 +18,7 @@ from detection.skin_finding_detector import SkinFindingDetector
 from history.store import HistoryStore
 from preprocessing.quality_checker import ImageQualityChecker
 from recommendation.catalog import Catalog, load_catalog
-from weather import WeatherService
+from services.weather import WeatherService
 
 logger = logging.getLogger("skincare.api")
 ANALYSIS_TTL_SECONDS = 60 * 60

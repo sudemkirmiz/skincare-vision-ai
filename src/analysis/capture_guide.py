@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Live guidance for camera capture: checks one small preview frame and says what to fix first.
 
 Frames are analysed in memory and never stored. The checks mirror what makes an analysis reliable:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from __future__ import annotations
 
 import base64
@@ -9,8 +11,8 @@ import pytest
 import requests
 from PIL import Image
 
-import vlm_engine
-from vlm_engine import (
+import vlm.engine as vlm_engine
+from vlm.engine import (
     VLMEngine,
     VLMOptions,
     VLMProviderError,
@@ -177,3 +179,37 @@ def test_gemini_caps_thinking_budget(face_image, fake_session):
     config = fake_session.post.call_args.kwargs["json"]["generationConfig"]
     # thinking tokens count against maxOutputTokens on 2.5 models; leave room for the JSON answer
     assert config["thinkingConfig"]["thinkingBudget"] < config["maxOutputTokens"] / 4
+
+
+def _openai_body(text: str, status: str = "completed") -> dict:
+    return {"status": status, "output": [
+        {"type": "reasoning", "summary": []},
+        {"type": "message", "content": [{"type": "output_text", "text": text}]},
+    ]}
+
+
+def test_openai_uses_responses_api_with_bearer_key(face_image, fake_session):
+    content = json.dumps({"visible_observations": ["x"], "care_suggestions": ["y"], "disclaimer": ""})
+    fake_session.post.return_value = _response(200, _openai_body(content))
+    result = VLMEngine(VLMOptions(openai_model="gpt-test")).analyze("OpenAI", face_image, "sk-test-key")
+    call = fake_session.post.call_args
+    payload = call.kwargs["json"]
+    assert call.args[0] == vlm_engine.OPENAI_URL
+    assert call.kwargs["headers"]["Authorization"] == "Bearer sk-test-key"
+    assert "sk-test-key" not in json.dumps(payload)
+    assert payload["model"] == "gpt-test" and payload["text"] == {"format": {"type": "json_object"}}
+    parts = payload["input"][0]["content"]
+    assert parts[0]["type"] == "input_text" and parts[1]["image_url"].startswith("data:image/jpeg;base64,")
+    assert result["provider"] == "OpenAI" and result["model"] == "gpt-test" and result["visible_observations"] == ["x"]
+
+
+def test_openai_truncated_and_chat(face_image, fake_session):
+    fake_session.post.return_value = _response(200, {"status": "incomplete", "incomplete_details": {"reason": "max_output_tokens"}, "output": []})
+    with pytest.raises(VLMProviderError) as error:
+        VLMEngine().analyze("OpenAI", face_image, "sk-test-key")
+    assert error.value.kind == "bad_output"
+    fake_session.post.return_value = _response(200, _openai_body("Merhaba"))
+    reply, model = VLMEngine(VLMOptions(openai_model="gpt-test")).chat("OpenAI", "sistem", [{"role": "user", "content": "selam"}], "sk-test-key")
+    payload = fake_session.post.call_args.kwargs["json"]
+    assert reply == "Merhaba" and model == "gpt-test"
+    assert payload["instructions"] == "sistem" and payload["input"] == [{"role": "user", "content": "selam"}]

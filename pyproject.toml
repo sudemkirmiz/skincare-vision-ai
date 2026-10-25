@@ -26,4 +26,4 @@ select = ["E", "F", "W", "I", "B", "UP"]
 ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["analysis", "config", "health", "history", "report", "api", "users", "recommendation", "vlm_quality", "vlm_router", "detection", "imaging", "main", "output", "preprocessing", "safety", "vlm_engine"]
+known-first-party = ["analysis", "api", "config", "detection", "history", "output", "preprocessing", "recommendation", "report", "safety", "services", "users", "vlm"]

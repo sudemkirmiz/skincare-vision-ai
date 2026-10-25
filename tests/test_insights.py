@@ -1,7 +1,9 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from datetime import date, timedelta
 from types import SimpleNamespace
 
-from history.insights import DISCLAIMER, adherence, build_insights, streak
+from history.insights import DISCLAIMER, adherence, build_insights, routine_streak, streak
 
 TODAY = date(2026, 10, 25)
 
@@ -18,6 +20,19 @@ def test_streak_and_adherence():
     assert streak(entries[1:], TODAY) == 2
     result = adherence(entries, TODAY)
     assert result["logged"] == 4 and result["am_done"] == 75 and result["pm_done"] == 67
+
+
+def test_routine_streak_counts_done_days_and_milestones():
+    # A logged day with both routines skipped breaks the routine streak even though the journal streak continues.
+    entries = [entry(1, am=True), entry(2, pm=True), entry(3, am=True, pm=True), entry(4, am=False, pm=False),
+               entry(5, am=True), entry(6, am=True), entry(7, am=True), entry(8, am=True)]
+    result = routine_streak(entries, TODAY)
+    assert result["current"] == 3 and result["best"] == 4 and result["today_done"] is False
+    assert result["reached"] == 3 and result["next"] == 7
+    assert [day["am"] for day in result["week"]] == [True, True, False, True, False, True, False]
+    assert result["week"][-1]["date"] == TODAY.isoformat()
+    # Skipping both yesterday and today ends it.
+    assert routine_streak(entries[2:], TODAY)["current"] == 0
 
 
 def test_too_few_days_gives_no_insights():

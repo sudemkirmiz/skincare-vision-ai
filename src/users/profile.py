@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """User profile collected at onboarding: identity, consent and the skin profile.
 
 Data minimisation: only the display name (can be a nickname) and the address form are

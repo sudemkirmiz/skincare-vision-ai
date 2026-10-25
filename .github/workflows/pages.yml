@@ -1,0 +1,56 @@
+name: Demo (GitHub Pages)
+
+# Publishes the static live demo: the React app with VITE_DEMO=1, answering the API in the browser from
+# recorded sample data (frontend/src/demo). No backend, model or API key is involved.
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Build the demo
+        run: npm run build:demo
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
+      # Pages has no SPA routing: unknown paths (deep links like /takip) get the app shell via 404.html.
+      - run: cp dist-demo/index.html dist-demo/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist-demo
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

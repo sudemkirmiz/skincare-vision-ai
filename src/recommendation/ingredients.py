@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Cosmetic (non-prescription) ingredient knowledge base.
 
 Deliberately conservative: anything with prescription status in Türkiye or unclear

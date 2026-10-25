@@ -1,13 +1,15 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 from datetime import date
 from types import SimpleNamespace
 
 import pytest
 
-import vlm_engine
-from coach import SAFE_FALLBACK, DailyLimiter, ask, avoid_list, build_context, clean_messages, filter_reply
+import vlm.engine as vlm_engine
 from recommendation.profile import SkinProfile
+from services.coach import SAFE_FALLBACK, DailyLimiter, ask, avoid_list, build_context, clean_messages, filter_reply
 from users.profile import UserProfile
-from vlm_engine import VLMEngine, VLMProviderError
+from vlm.engine import VLMEngine, VLMProviderError
 
 
 def profile(**skin):

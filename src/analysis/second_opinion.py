@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Gemini "second opinion" on spots, reconciled with YOLO and the colour-based candidates.
 
 Three noisy detectors are combined without retraining:

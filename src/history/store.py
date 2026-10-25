@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 """Local analysis history (SQLite).
 
 Only results and a small face thumbnail are stored, never the uploaded photo. Records
@@ -16,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 MIGRATIONS = {
     1: [
         """
@@ -97,6 +99,11 @@ MIGRATIONS = {
         )
         """,
         "CREATE INDEX idx_shelf_person ON shelf (person)",
+    ],
+    5: [
+        # Device-scoped sharing: a hash of the browser's device key; '' = visible to every device (shared mode).
+        "ALTER TABLE profiles ADD COLUMN owner TEXT NOT NULL DEFAULT ''",
+        "CREATE INDEX idx_profiles_owner ON profiles (owner)",
     ],
 }
 JSON_FIELDS = ("scores", "spot_counts", "regions", "region_metrics", "skin_tone", "head_pose", "routine_focus", "routine_actives", "observations")
@@ -270,15 +277,16 @@ class HistoryStore:
 
     # --- profiles ---------------------------------------------------------
     # `person` in analyses/events holds the profile id from schema v2 on.
-    def save_profile(self, profile: dict[str, Any]) -> str:
+    def save_profile(self, profile: dict[str, Any], owner: str = "") -> str:
+        """Insert or update; the owner is set when the profile is created and never changes."""
         now = datetime.now().isoformat(timespec="seconds")
         profile = {**profile, "updated_at": now}
         with self._lock, self._connect() as connection:
             is_first = connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 0
             connection.execute(
-                """INSERT INTO profiles (id, data, created_at, updated_at, last_used_at) VALUES (?, ?, ?, ?, ?)
+                """INSERT INTO profiles (id, data, created_at, updated_at, last_used_at, owner) VALUES (?, ?, ?, ?, ?, ?)
                    ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at, last_used_at = excluded.last_used_at""",
-                (profile["id"], json.dumps(profile, ensure_ascii=False), profile.get("created_at") or now, now, now),
+                (profile["id"], json.dumps(profile, ensure_ascii=False), profile.get("created_at") or now, now, now, owner),
             )
             if is_first:
                 # History saved before profiles existed (person "Ben") now belongs to the first profile.
@@ -291,10 +299,18 @@ class HistoryStore:
             row = connection.execute("SELECT data FROM profiles WHERE id = ?", (profile_id,)).fetchone()
         return json.loads(row[0]) if row else None
 
-    def list_profiles(self) -> list[dict[str, Any]]:
-        """Most recently used first."""
+    def profile_owner(self, profile_id: str) -> str | None:
         with self._connect() as connection:
-            rows = connection.execute("SELECT data FROM profiles ORDER BY last_used_at DESC").fetchall()
+            row = connection.execute("SELECT owner FROM profiles WHERE id = ?", (profile_id,)).fetchone()
+        return row[0] if row else None
+
+    def list_profiles(self, owner: str | None = None) -> list[dict[str, Any]]:
+        """Most recently used first; with an owner, only that device's profiles."""
+        query, params = "SELECT data FROM profiles", ()
+        if owner is not None:
+            query, params = query + " WHERE owner = ?", (owner,)
+        with self._connect() as connection:
+            rows = connection.execute(query + " ORDER BY last_used_at DESC", params).fetchall()
         return [json.loads(row[0]) for row in rows]
 
     def touch_profile(self, profile_id: str) -> None:
@@ -327,6 +343,11 @@ class HistoryStore:
         with self._connect() as connection:
             rows = connection.execute("SELECT * FROM events WHERE person = ? ORDER BY date", (clean_person(person),)).fetchall()
         return [dict(row) for row in rows]
+
+    def event_person(self, event_id: str) -> str | None:
+        with self._connect() as connection:
+            row = connection.execute("SELECT person FROM events WHERE id = ?", (event_id,)).fetchone()
+        return row[0] if row else None
 
     def delete_event(self, event_id: str) -> None:
         with self._lock, self._connect() as connection:

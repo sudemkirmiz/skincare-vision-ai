@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import clsx from 'clsx'
 /* oxlint-disable react/only-export-components -- the UI kit intentionally exports one pure score helper */
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
@@ -138,7 +140,7 @@ export function Drawer({ open, onClose, title, children }: { open: boolean; onCl
   }, [open, onClose])
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-ink/30" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex justify-end bg-ink/30 dark:bg-black/60" onClick={onClose}>
       <div
         ref={panel}
         tabIndex={-1}

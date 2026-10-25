@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import clsx from 'clsx'
 /* oxlint-disable react/only-export-components -- capability detection belongs with the capture component */
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -143,7 +145,7 @@ export function CameraCapture({ maxShots, onClose, onDone }: { maxShots: number;
   const title = target === 'front' ? 'Önden fotoğraf' : target === 'side' ? 'Yan açı' : 'Fotoğraflarınız'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 sm:p-6" role="dialog" aria-modal="true" aria-label="Kamerayla çekim">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 sm:p-6 dark:bg-black/80" role="dialog" aria-modal="true" aria-label="Kamerayla çekim">
       <div className="flex h-full w-full flex-col overflow-hidden bg-[#0f1612] text-white sm:h-auto sm:max-w-xl sm:rounded-[var(--radius-card)]">
         <div className="flex items-center justify-between px-5 py-4">
           <div>
@@ -191,7 +193,7 @@ export function CameraCapture({ maxShots, onClose, onDone }: { maxShots: number;
           ) : target ? (
             <>
               <p className="max-w-[16rem] text-xs leading-relaxed text-white/60">Her şey uygun olduğunda fotoğraf kendiliğinden çekilir. Görüntü kaydedilmez; yalnızca anlık kontrol edilir.</p>
-              <Button onClick={capture} disabled={!stream} className="bg-none bg-white text-ink shadow-none hover:bg-white/90"><Camera size={18} /> Şimdi çek</Button>
+              <Button onClick={capture} disabled={!stream} className="bg-none bg-white text-[#24342b] shadow-none dark:bg-white hover:bg-white/90"><Camera size={18} /> Şimdi çek</Button>
             </>
           ) : (
             <>

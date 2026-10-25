@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import numpy as np
 
 from detection.skin_finding_detector import letterbox_image, map_letterbox_box_to_original, xyxy_to_xywh

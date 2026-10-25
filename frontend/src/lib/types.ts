@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 /** Shapes returned by the FastAPI backend (only the fields the UI reads). */
 
 export type Dict = Record<string, string>
@@ -27,7 +29,7 @@ export interface Options {
   hf_models: string[]
   default_provider: string
   limits: { max_upload_mb: number; max_views: number }
-  flags: { history_enabled: boolean; second_opinion: boolean; allow_user_api_keys: boolean }
+  flags: { history_enabled: boolean; second_opinion: boolean; allow_user_api_keys: boolean; device_scoped?: boolean }
 }
 
 export interface SkinProfile {
@@ -135,6 +137,8 @@ export interface Analysis {
   region_summary: { regions: Region[]; most_affected_name: string | null; zones: Record<string, { name: string; count: number; density: number | null }> } | null
   vlm_output: { provider: string; model: string; cached?: boolean; quality_score?: number } | null
   vlm_error: string | null
+  /** Who wrote the care comment: an AI provider, or the local rule engine when no AI was used. */
+  comment_source?: 'ai' | 'local' | null
   vlm_note: string | null
   vlm_attempts?: Record<string, unknown>[]
   skin_findings?: { summary?: { total_detections?: number }; findings?: { confidence?: number }[] } | null
@@ -230,12 +234,23 @@ export interface Insight {
   evidence: { with_days: number; without_days: number }
 }
 
+export interface RoutineStreak {
+  /** Days in a row with at least one routine done (yesterday keeps it alive until today is logged). */
+  current: number
+  best: number
+  today_done: boolean
+  reached: number
+  next: number | null
+  week: { date: string; am: boolean; pm: boolean }[]
+}
+
 export interface JournalResponse {
   entries: JournalEntry[]
   routine_actives: string[]
   summary: {
     streak: number
     adherence: { days: number; logged: number; am_done: number | null; pm_done: number | null }
+    routine: RoutineStreak
     feel: { this_week: number; last_week: number | null; change: number | null } | null
     logged_days: number
     needed_days: number
@@ -269,8 +284,19 @@ export interface ShelfResponse {
   conflicts: string[]
   gaps: string[]
   notes: string[]
+  plan: ShelfPlan
   categories: Record<string, string>
   usages: Record<string, string>
+}
+
+export interface PlanStep { id: string; name: string; category: string; category_label: string; actives: string[]; tip: string }
+export interface ShelfPlan {
+  morning: PlanStep[]
+  nights: { day: string; theme: 'rest' | 'acid' | 'retinoid' | 'mask'; theme_label: string; steps: PlanStep[] }[]
+  as_needed: string[]
+  skipped: { name: string; reason: string }[]
+  tips: string[]
+  active_nights: number
 }
 
 export interface Place { name: string; region: string; lat: number; lon: number }

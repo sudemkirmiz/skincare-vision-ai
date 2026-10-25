@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useState, type ReactNode } from 'react'
@@ -6,6 +8,7 @@ import { api } from '../lib/api'
 import { useAppState } from '../lib/app-state'
 import type { Analysis, Routine } from '../lib/types'
 import { Button, Card, Notice, SectionHeader, Spinner, Toggle } from './ui'
+import { asset } from '../lib/demo'
 
 function stepIcon(step: string) {
   if (step === 'Temizleme') return <Cleanser size={20} />
@@ -140,7 +143,7 @@ export function ProductsPanel({ analysis }: { analysis: Analysis }) {
                   {section.search_links.map((link) => (
                     <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" title={`${link.name} üzerinde ara`}
                       className="inline-flex items-center gap-2 rounded-full border border-line bg-surface py-1 pr-3 pl-1 text-xs font-semibold transition hover:border-brand-300 hover:shadow-sm">
-                      {link.icon ? <img src={`/stores/${link.icon}`} alt="" className="size-5 rounded-md" /> : null}{link.name}
+                      {link.icon ? <img src={asset(`stores/${link.icon}`)} alt="" className="size-5 rounded-md" /> : null}{link.name}
                     </a>
                   ))}
                 </div>

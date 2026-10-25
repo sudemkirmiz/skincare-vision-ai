@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Sudem Kırmız
 import json
 from pathlib import Path
 
@@ -40,7 +42,7 @@ def test_runtime_image_is_minimal_and_non_root():
     assert "COPY . ." not in dockerfile
     assert "/app/state" in dockerfile
     assert "--workers\", \"1" in dockerfile
-    assert "LICENSE THIRD_PARTY_NOTICES.md" in dockerfile
+    assert "LICENSE NOTICE TRADEMARKS.md THIRD_PARTY_NOTICES.md" in dockerfile
     assert "licenses/ ./licenses/" in dockerfile
 
 

@@ -1,0 +1,1009 @@
+{
+  "person": "40c918b132ec",
+  "exported_at": "2026-10-25T21:38:19",
+  "analyses": [
+    {
+      "id": "demo0",
+      "person": "40c918b132ec",
+      "created_at": "2026-08-02T09:00:00",
+      "overall_score": 13,
+      "scores": {
+        "spots": 5,
+        "redness": 36,
+        "tone": 1,
+        "shine": 1,
+        "texture": 36
+      },
+      "spot_counts": {
+        "yolo": 13,
+        "colour": 16,
+        "total": 36
+      },
+      "regions": {
+        "forehead": 19,
+        "nose": 2,
+        "left_cheek": 7,
+        "right_cheek": 7,
+        "chin": 0
+      },
+      "region_metrics": {
+        "forehead": {
+          "name": "Alın",
+          "redness": 80,
+          "tone": 33,
+          "shine": 35
+        },
+        "nose": {
+          "name": "Burun",
+          "redness": 38,
+          "tone": 0,
+          "shine": 0
+        },
+        "left_cheek": {
+          "name": "Sol yanak",
+          "redness": 42,
+          "tone": 1,
+          "shine": 0
+        },
+        "right_cheek": {
+          "name": "Sağ yanak",
+          "redness": 34,
+          "tone": 0,
+          "shine": 0
+        },
+        "chin": {
+          "name": "Çene",
+          "redness": 78,
+          "tone": 0,
+          "shine": 97
+        }
+      },
+      "skin_tone": {
+        "ita": 47.0,
+        "category": "Açık"
+      },
+      "quality_status": "needs_review",
+      "method": "mediapipe",
+      "head_pose": {
+        "yaw": -0.4,
+        "pitch": 10.4,
+        "roll": 0.2
+      },
+      "routine_focus": [
+        "Sivilce / nokta",
+        "Leke / ton eşitsizliği",
+        "Parlama / yağlanma"
+      ],
+      "routine_actives": [
+        "Niasinamid",
+        "Azelaik asit"
+      ],
+      "observations": [
+        "Helin, alın ve yanak bölgelerinizde belirgin kızarıklıklar ve küçük noktalar görülmektedir.",
+        "Cildinizde ton eşitsizlikleri ve T-bölgesinde parlama gözlemlenmektedir.",
+        "Gözenek görünümü ve doku pürüzlülüğü dikkati çekmektedir."
+      ],
+      "vlm_provider": "Gemini",
+      "note": "İlk analiz",
+      "has_thumbnail": true
+    },
+    {
+      "id": "demo1",
+      "person": "40c918b132ec",
+      "created_at": "2026-08-23T10:00:00",
+      "overall_score": 16,
+      "scores": {
+        "spots": 10,
+        "redness": 41,
+        "tone": 1,
+        "shine": 1,
+        "texture": 41
+      },
+      "spot_counts": {
+        "yolo": 13,
+        "colour": 16,
+        "total": 35
+      },
+      "regions": {
+        "forehead": 18,
+        "nose": 2,
+        "left_cheek": 7,
+        "right_cheek": 7,
+        "chin": 0
+      },
+      "region_metrics": {
+        "forehead": {
+          "name": "Alın",
+          "redness": 80,
+          "tone": 33,
+          "shine": 35
+        },
+        "nose": {
+          "name": "Burun",
+          "redness": 38,
+          "tone": 0,
+          "shine": 0
+        },
+        "left_cheek": {
+          "name": "Sol yanak",
+          "redness": 42,
+          "tone": 1,
+          "shine": 0
+        },
+        "right_cheek": {
+          "name": "Sağ yanak",
+          "redness": 34,
+          "tone": 0,
+          "shine": 0
+        },
+        "chin": {
+          "name": "Çene",
+          "redness": 78,
+          "tone": 0,
+          "shine": 97
+        }
+      },
+      "skin_tone": {
+        "ita": 47.0,
+        "category": "Açık"
+      },
+      "quality_status": "needs_review",
+      "method": "mediapipe",
+      "head_pose": {
+        "yaw": -0.4,
+        "pitch": 10.4,
+        "roll": 0.2
+      },
+      "routine_focus": [
+        "Sivilce / nokta",
+        "Leke / ton eşitsizliği",
+        "Parlama / yağlanma"
+      ],
+      "routine_actives": [
+        "Niasinamid",
+        "Azelaik asit"
+      ],
+      "observations": [
+        "Helin, alın ve yanak bölgelerinizde belirgin kızarıklıklar ve küçük noktalar görülmektedir.",
+        "Cildinizde ton eşitsizlikleri ve T-bölgesinde parlama gözlemlenmektedir.",
+        "Gözenek görünümü ve doku pürüzlülüğü dikkati çekmektedir."
+      ],
+      "vlm_provider": "Gemini",
+      "note": "",
+      "has_thumbnail": true
+    },
+    {
+      "id": "demo2",
+      "person": "40c918b132ec",
+      "created_at": "2026-09-13T11:00:00",
+      "overall_score": 20,
+      "scores": {
+        "spots": 12,
+        "redness": 43,
+        "tone": 1,
+        "shine": 1,
+        "texture": 43
+      },
+      "spot_counts": {
+        "yolo": 13,
+        "colour": 16,
+        "total": 33
+      },
+      "regions": {
+        "forehead": 17,
+        "nose": 2,
+        "left_cheek": 7,
+        "right_cheek": 7,
+        "chin": 0
+      },
+      "region_metrics": {
+        "forehead": {
+          "name": "Alın",
+          "redness": 80,
+          "tone": 33,
+          "shine": 35
+        },
+        "nose": {
+          "name": "Burun",
+          "redness": 38,
+          "tone": 0,
+          "shine": 0
+        },
+        "left_cheek": {
+          "name": "Sol yanak",
+          "redness": 42,
+          "tone": 1,
+          "shine": 0
+        },
+        "right_cheek": {
+          "name": "Sağ yanak",
+          "redness": 34,
+          "tone": 0,
+          "shine": 0
+        },
+        "chin": {
+          "name": "Çene",
+          "redness": 78,
+          "tone": 0,
+          "shine": 97
+        }
+      },
+      "skin_tone": {
+        "ita": 47.0,
+        "category": "Açık"
+      },
+      "quality_status": "needs_review",
+      "method": "mediapipe",
+      "head_pose": {
+        "yaw": -0.4,
+        "pitch": 10.4,
+        "roll": 0.2
+      },
+      "routine_focus": [
+        "Sivilce / nokta",
+        "Leke / ton eşitsizliği",
+        "Parlama / yağlanma"
+      ],
+      "routine_actives": [
+        "Niasinamid",
+        "Azelaik asit"
+      ],
+      "observations": [
+        "Helin, alın ve yanak bölgelerinizde belirgin kızarıklıklar ve küçük noktalar görülmektedir.",
+        "Cildinizde ton eşitsizlikleri ve T-bölgesinde parlama gözlemlenmektedir.",
+        "Gözenek görünümü ve doku pürüzlülüğü dikkati çekmektedir."
+      ],
+      "vlm_provider": "Gemini",
+      "note": "Niasinamide başladım",
+      "has_thumbnail": true
+    },
+    {
+      "id": "demo3",
+      "person": "40c918b132ec",
+      "created_at": "2026-10-04T12:00:00",
+      "overall_score": 23,
+      "scores": {
+        "spots": 17,
+        "redness": 48,
+        "tone": 1,
+        "shine": 5,
+        "texture": 48
+      },
+      "spot_counts": {
+        "yolo": 13,
+        "colour": 16,
+        "total": 31
+      },
+      "regions": {
+        "forehead": 16,
+        "nose": 2,
+        "left_cheek": 6,
+        "right_cheek": 6,
+        "chin": 0
+      },
+      "region_metrics": {
+        "forehead": {
+          "name": "Alın",
+          "redness": 80,
+          "tone": 33,
+          "shine": 35
+        },
+        "nose": {
+          "name": "Burun",
+          "redness": 38,
+          "tone": 0,
+          "shine": 0
+        },
+        "left_cheek": {
+          "name": "Sol yanak",
+          "redness": 42,
+          "tone": 1,
+          "shine": 0
+        },
+        "right_cheek": {
+          "name": "Sağ yanak",
+          "redness": 34,
+          "tone": 0,
+          "shine": 0
+        },
+        "chin": {
+          "name": "Çene",
+          "redness": 78,
+          "tone": 0,
+          "shine": 97
+        }
+      },
+      "skin_tone": {
+        "ita": 47.0,
+        "category": "Açık"
+      },
+      "quality_status": "needs_review",
+      "method": "mediapipe",
+      "head_pose": {
+        "yaw": -0.4,
+        "pitch": 10.4,
+        "roll": 0.2
+      },
+      "routine_focus": [
+        "Sivilce / nokta",
+        "Leke / ton eşitsizliği",
+        "Parlama / yağlanma"
+      ],
+      "routine_actives": [
+        "Niasinamid",
+        "Azelaik asit"
+      ],
+      "observations": [
+        "Helin, alın ve yanak bölgelerinizde belirgin kızarıklıklar ve küçük noktalar görülmektedir.",
+        "Cildinizde ton eşitsizlikleri ve T-bölgesinde parlama gözlemlenmektedir.",
+        "Gözenek görünümü ve doku pürüzlülüğü dikkati çekmektedir."
+      ],
+      "vlm_provider": "Gemini",
+      "note": "",
+      "has_thumbnail": true
+    },
+    {
+      "id": "demo4",
+      "person": "40c918b132ec",
+      "created_at": "2026-10-25T13:00:00",
+      "overall_score": 27,
+      "scores": {
+        "spots": 19,
+        "redness": 50,
+        "tone": 1,
+        "shine": 7,
+        "texture": 50
+      },
+      "spot_counts": {
+        "yolo": 13,
+        "colour": 16,
+        "total": 29
+      },
+      "regions": {
+        "forehead": 15,
+        "nose": 2,
+        "left_cheek": 6,
+        "right_cheek": 6,
+        "chin": 0
+      },
+      "region_metrics": {
+        "forehead": {
+          "name": "Alın",
+          "redness": 80,
+          "tone": 33,
+          "shine": 35
+        },
+        "nose": {
+          "name": "Burun",
+          "redness": 38,
+          "tone": 0,
+          "shine": 0
+        },
+        "left_cheek": {
+          "name": "Sol yanak",
+          "redness": 42,
+          "tone": 1,
+          "shine": 0
+        },
+        "right_cheek": {
+          "name": "Sağ yanak",
+          "redness": 34,
+          "tone": 0,
+          "shine": 0
+        },
+        "chin": {
+          "name": "Çene",
+          "redness": 78,
+          "tone": 0,
+          "shine": 97
+        }
+      },
+      "skin_tone": {
+        "ita": 47.0,
+        "category": "Açık"
+      },
+      "quality_status": "needs_review",
+      "method": "mediapipe",
+      "head_pose": {
+        "yaw": -0.4,
+        "pitch": 10.4,
+        "roll": 0.2
+      },
+      "routine_focus": [
+        "Sivilce / nokta",
+        "Leke / ton eşitsizliği",
+        "Parlama / yağlanma"
+      ],
+      "routine_actives": [
+        "Niasinamid",
+        "Azelaik asit"
+      ],
+      "observations": [
+        "Helin, alın ve yanak bölgelerinizde belirgin kızarıklıklar ve küçük noktalar görülmektedir.",
+        "Cildinizde ton eşitsizlikleri ve T-bölgesinde parlama gözlemlenmektedir.",
+        "Gözenek görünümü ve doku pürüzlülüğü dikkati çekmektedir."
+      ],
+      "vlm_provider": "Gemini",
+      "note": "",
+      "has_thumbnail": true
+    }
+  ],
+  "events": [
+    {
+      "id": "90a3075fa378",
+      "person": "40c918b132ec",
+      "date": "2026-09-13",
+      "kind": "routine_start",
+      "note": "Niasinamid serumuna başladım"
+    },
+    {
+      "id": "620ab68ac67c",
+      "person": "40c918b132ec",
+      "date": "2026-10-05",
+      "kind": "routine_change",
+      "note": "Akşam retinol eklendi"
+    }
+  ],
+  "journal": [
+    {
+      "date": "2026-09-13",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [],
+      "symptoms": [
+        "oiliness"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-14",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-15",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-09-16",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-17",
+      "am_done": true,
+      "pm_done": false,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-18",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-09-19",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [
+        "oiliness"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-20",
+      "am_done": false,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-21",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-09-22",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [
+        "sun"
+      ],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-23",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-24",
+      "am_done": true,
+      "pm_done": false,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-26",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-27",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-09-28",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [
+        "stress"
+      ],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-29",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-09-30",
+      "am_done": false,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-01",
+      "am_done": true,
+      "pm_done": false,
+      "skin_feel": 5,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [
+        "oiliness"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-02",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-03",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "sun"
+      ],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-04",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-05",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-06",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-07",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [
+        "stress"
+      ],
+      "symptoms": [
+        "oiliness"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-09",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-10",
+      "am_done": false,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-11",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-12",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-13",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [
+        "oiliness"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-14",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [
+        "sun"
+      ],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-15",
+      "am_done": true,
+      "pm_done": false,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-16",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [
+        "stress"
+      ],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-17",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-18",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-19",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 5,
+      "triggers": [],
+      "symptoms": [
+        "oiliness"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-20",
+      "am_done": false,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-21",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [
+        "short_sleep"
+      ],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    },
+    {
+      "date": "2026-10-22",
+      "am_done": true,
+      "pm_done": false,
+      "skin_feel": 2,
+      "triggers": [],
+      "symptoms": [
+        "breakout"
+      ],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-23",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [],
+      "note": ""
+    },
+    {
+      "date": "2026-10-24",
+      "am_done": true,
+      "pm_done": true,
+      "skin_feel": 4,
+      "triggers": [],
+      "symptoms": [],
+      "actives": [
+        "Retinol"
+      ],
+      "note": ""
+    }
+  ],
+  "shelf": [
+    {
+      "id": "df625d399578",
+      "name": "Jel Temizleyici",
+      "category": "cleanser",
+      "usage": "both",
+      "inci": "Aqua, Glycerin, Coco-Glucoside, Sodium Lauroyl Sarcosinate, Panthenol",
+      "opened_at": null,
+      "pao_months": null,
+      "created_at": "2026-10-25T21:38:17"
+    },
+    {
+      "id": "310813b2d6cf",
+      "name": "C Vitamini Serumu",
+      "category": "serum",
+      "usage": "am",
+      "inci": "Aqua, Ascorbic Acid, Glycerin, Ferulic Acid, Tocopherol",
+      "opened_at": "2025-12-29",
+      "pao_months": 6,
+      "created_at": "2026-10-25T21:38:17"
+    },
+    {
+      "id": "64dfb1efd6e1",
+      "name": "Niasinamid %10",
+      "category": "serum",
+      "usage": "both",
+      "inci": "Aqua, Niacinamide, Zinc PCA, Glycerin, Pentylene Glycol",
+      "opened_at": null,
+      "pao_months": null,
+      "created_at": "2026-10-25T21:38:17"
+    },
+    {
+      "id": "82e026250660",
+      "name": "Bariyer Krem",
+      "category": "moisturizer",
+      "usage": "both",
+      "inci": "Aqua, Glycerin, Ceramide NP, Cholesterol, Squalane, Panthenol",
+      "opened_at": "2026-09-15",
+      "pao_months": 12,
+      "created_at": "2026-10-25T21:38:17"
+    },
+    {
+      "id": "70765da93609",
+      "name": "SPF 50 Fluid",
+      "category": "sunscreen",
+      "usage": "am",
+      "inci": "Aqua, Zinc Oxide, Glycerin, Tocopherol",
+      "opened_at": "2026-08-16",
+      "pao_months": 12,
+      "created_at": "2026-10-25T21:38:17"
+    },
+    {
+      "id": "bca3e37c3e4f",
+      "name": "Retinol 0.3%",
+      "category": "serum",
+      "usage": "pm",
+      "inci": "Aqua, Glycerin, Retinol, Squalane, Tocopherol",
+      "opened_at": null,
+      "pao_months": null,
+      "created_at": "2026-10-25T21:38:17"
+    },
+    {
+      "id": "d40904dbe695",
+      "name": "Glikolik Tonik",
+      "category": "exfoliant",
+      "usage": "pm",
+      "inci": "Aqua, Glycolic Acid, Glycerin, Aloe Barbadensis Leaf Juice",
+      "opened_at": null,
+      "pao_months": null,
+      "created_at": "2026-10-25T21:38:17"
+    }
+  ]
+}

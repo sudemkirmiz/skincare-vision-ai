@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Sudem Kırmız
 /**
  * Dev tool, not a regular test: renders every icon to ../outputs/icon-sheet.png for visual review.
  * Run with: ICON_SHEET=1 npx vitest run scripts/icon-sheet.test.tsx
