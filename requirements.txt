@@ -1,6 +1,6 @@
 # Runtime dependencies (tested: Python 3.13, fastapi 0.12x, ultralytics 8.4, torch 2.14)
 numpy>=1.26,<3
-opencv-python>=4.10,<5
+opencv-python>=5.0.0.93,<6
 Pillow>=10.0,<14
 ultralytics>=8.3,<9
 requests>=2.32,<3
