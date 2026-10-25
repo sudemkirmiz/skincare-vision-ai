@@ -1,7 +1,7 @@
 # Tested direct dependency set. Keep requirements*.txt as supported ranges and use
 # this file in CI/Docker for reproducible installs. Regenerate after an intentional upgrade.
 numpy==2.5.4
-opencv-python==4.14.0.94
+opencv-python==5.0.0.93
 Pillow==13.0.0
 ultralytics==8.4.187
 requests==2.34.2
