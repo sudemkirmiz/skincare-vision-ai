@@ -2,7 +2,7 @@
 numpy>=1.26,<3
 opencv-python>=4.10,<5
 Pillow>=10.0,<14
-ultralytics>=8.3,<9
+ultralytics>=8.4.192,<9
 requests>=2.32,<3
 fastapi>=0.115,<1
 uvicorn[standard]>=0.30,<1
