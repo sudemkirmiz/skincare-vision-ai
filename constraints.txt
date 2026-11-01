@@ -13,7 +13,7 @@ reportlab==5.1.0
 absl-py==2.5.1
 flatbuffers==25.12.19
 sounddevice==0.5.6
-pytest==9.1.1
+pytest==9.2.0
 ruff==0.17.2
 pypdf==6.21.2
 httpx==0.28.1
