@@ -15,7 +15,7 @@ flatbuffers==25.12.19
 sounddevice==0.5.6
 pytest==9.1.1
 ruff==0.17.2
-pypdf==6.21.2
+pypdf==6.21.4
 httpx==0.28.1
 bandit==1.9.4
 PyYAML==6.0.3
